@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>СУКА</title>
+
+<link rel="icon" type="image/png" href="https://i.pinimg.com/736x/c0/63/32/c06332b424e199f80eca0dea00210e01.jpg">
+
+<style>
+html,body{
+margin:0;
+padding:0;
+background:#050505;
+overflow:hidden;
+font-family:monospace;
+color:#fff;
+cursor: none;
+}
+
+a, a:hover, a:active, a:visited, button, img, div, span, [onclick] {
+cursor: none !important;
+}
+
+canvas{
+position:fixed;
+top:0;
+left:0;
+}
+
+#ascii{
+position:absolute;
+top:50%;
+left:50%;
+transform:translate(-50%,-50%);
+font-size:10px;
+line-height:10px;
+white-space:pre;
+text-align:center;
+filter:drop-shadow(0 0 12px #aaa);
+}
+
+#floating{
+position:absolute;
+top:22%;
+width:100%;
+text-align:center;
+font-size:14px;
+opacity:0.5;
+}
+
+#title{
+position:absolute;
+top:10px;
+width:100%;
+text-align:center;
+opacity:0.7;
+}
+
+/* Кнопки выдвижения */
+.slide-btn {
+position: absolute;
+background: rgba(255,255,255,0.2);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,255,255,0.3);
+color: white;
+font-family: monospace;
+font-size: 14px;
+padding: 12px 18px;
+border-radius: 30px;
+cursor: none;
+transition: 0.3s;
+z-index: 200;
+}
+
+.slide-btn:hover {
+background: rgba(255,255,255,0.4);
+transform: scale(1.05);
+}
+
+/* Позиции кнопок */
+.btn-right { right: 20px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; text-orientation: mixed; }
+.btn-left { left: 20px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; text-orientation: mixed; }
+.btn-top { top: 20px; left: 50%; transform: translateX(-50%); }
+.btn-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
+
+/* Выдвижные панели */
+.slide-panel {
+position: absolute;
+background: rgba(10,10,10,0.95);
+backdrop-filter: blur(15px);
+border: 1px solid rgba(255,255,255,0.2);
+transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+z-index: 150;
+display: flex;
+flex-wrap: wrap;
+gap: 15px;
+padding: 20px;
+overflow-y: auto;
+}
+
+/* Правая панель */
+.panel-right {
+top: 0;
+right: 0;
+width: 280px;
+height: 100%;
+transform: translateX(100%);
+flex-direction: column;
+}
+
+.panel-right.open { transform: translateX(0); }
+
+/* Левая панель */
+.panel-left {
+top: 0;
+left: 0;
+width: 280px;
+height: 100%;
+transform: translateX(-100%);
+flex-direction: column;
+}
+
+.panel-left.open { transform: translateX(0); }
+
+/* Верхняя панель */
+.panel-top {
+top: 0;
+left: 0;
+width: 100%;
+height: 250px;
+transform: translateY(-100%);
+justify-content: center;
+}
+
+.panel-top.open { transform: translateY(0); }
+
+/* Нижняя панель */
+.panel-bottom {
+bottom: 0;
+left: 0;
+width: 100%;
+height: 250px;
+transform: translateY(100%);
+justify-content: center;
+}
+
+.panel-bottom.open { transform: translateY(0); }
+
+/* Картинки внутри панелей */
+.panel-item {
+text-align: center;
+cursor: none;
+transition: 0.2s;
+}
+
+.panel-item:hover {
+transform: scale(1.05);
+}
+
+.panel-item img {
+width: 200px;
+height: 200px;
+object-fit: cover;
+border-radius: 15px;
+border: 2px solid rgba(255,255,255,0.3);
+transition: 0.2s;
+}
+
+.panel-item img:hover {
+border-color: white;
+box-shadow: 0 0 15px rgba(255,255,255,0.3);
+}
+
+.panel-item span {
+display: block;
+margin-top: 8px;
+font-size: 12px;
+opacity: 0.8;
+}
+
+/* Закрыть панель */
+.close-panel {
+position: absolute;
+top: 10px;
+right: 15px;
+font-size: 24px;
+cursor: none;
+background: none;
+border: none;
+color: white;
+opacity: 0.7;
+transition: 0.2s;
+}
+
+.close-panel:hover {
+opacity: 1;
+transform: scale(1.1);
+}
+
+/* Для вертикальных панелей кнопка закрытия сверху */
+.panel-left .close-panel,
+.panel-right .close-panel {
+top: 10px;
+right: 15px;
+}
+
+/* Стилизация скролла */
+.slide-panel::-webkit-scrollbar {
+width: 5px;
+}
+
+.slide-panel::-webkit-scrollbar-track {
+background: rgba(255,255,255,0.1);
+border-radius: 10px;
+}
+
+.slide-panel::-webkit-scrollbar-thumb {
+background: rgba(255,255,255,0.4);
+border-radius: 10px;
+}
+
+.cursor{
+position:fixed;
+width:22px;
+height:22px;
+border-radius:50%;
+pointer-events:none;
+background:radial-gradient(circle, rgba(255,255,255,0.6), rgba(200,200,200,0.3), transparent);
+mix-blend-mode:difference;
+z-index: 9999;
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg"></canvas>
+
+<div id="title">СУКА</div>
+<div id="floating"></div>
+<div id="ascii"></div>
+
+<!-- Кнопки выдвижения -->
+<button class="slide-btn btn-right" id="btnRight">▶ ВЫДВИНУТЬ ◀</button>
+<button class="slide-btn btn-left" id="btnLeft">◀ ВЫДВИНУТЬ ▶</button>
+<button class="slide-btn btn-top" id="btnTop">▲ ВЫДВИНУТЬ ▼</button>
+<button class="slide-btn btn-bottom" id="btnBottom">▼ ВЫДВИНУТЬ ▲</button>
+
+<!-- Правая панель -->
+<div class="slide-panel panel-right" id="panelRight">
+    <button class="close-panel" onclick="closePanel('panelRight')">✕</button>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/02/7c/9b/027c9b517fb3e8f0c4780b56b9146fbc.jpg"><span>🚫 18+</span></div>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/23/a4/e0/23a4e0663943e95c68effb4d202ddbb9.jpg"><span>🎶 SOUNDCLOUD</span></div>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/b4/41/7e/b4417e4fbfff2e229152c5f8ebcfed03.jpg"><span>💬 TELEGRAM</span></div>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/c0/63/32/c06332b424e199f80eca0dea00210e01.jpg"><span>🎮 DIMFIMA</span></div>
+</div>
+
+<!-- Левая панель -->
+<div class="slide-panel panel-left" id="panelLeft">
+    <button class="close-panel" onclick="closePanel('panelLeft')">✕</button>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/02/7c/9b/027c9b517fb3e8f0c4780b56b9146fbc.jpg"><span>🚫 18+</span></div>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/23/a4/e0/23a4e0663943e95c68effb4d202ddbb9.jpg"><span>🎶 MUSIC</span></div>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/b4/41/7e/b4417e4fbfff2e229152c5f8ebcfed03.jpg"><span>💬 CHAT</span></div>
+</div>
+
+<!-- Верхняя панель -->
+<div class="slide-panel panel-top" id="panelTop">
+    <button class="close-panel" onclick="closePanel('panelTop')">✕</button>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/02/7c/9b/027c9b517fb3e8f0c4780b56b9146fbc.jpg"><span>18+</span></div>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/23/a4/e0/23a4e0663943e95c68effb4d202ddbb9.jpg"><span>SOUNDCLOUD</span></div>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/b4/41/7e/b4417e4fbfff2e229152c5f8ebcfed03.jpg"><span>TELEGRAM</span></div>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/c0/63/32/c06332b424e199f80eca0dea00210e01.jpg"><span>DIMFIMA</span></div>
+</div>
+
+<!-- Нижняя панель -->
+<div class="slide-panel panel-bottom" id="panelBottom">
+    <button class="close-panel" onclick="closePanel('panelBottom')">✕</button>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/02/7c/9b/027c9b517fb3e8f0c4780b56b9146fbc.jpg"><span>18+</span></div>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/23/a4/e0/23a4e0663943e95c68effb4d202ddbb9.jpg"><span>SOUNDCLOUD</span></div>
+    <div class="panel-item"><img src="https://i.pinimg.com/736x/b4/41/7e/b4417e4fbfff2e229152c5f8ebcfed03.jpg"><span>TELEGRAM</span></div>
+</div>
+
+<div class="cursor" id="cursor"></div>
+
+<script>
+const canvas=document.getElementById("bg");
+const ctx=canvas.getContext("2d");
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+
+let particles=[];
+for(let i=0;i<120;i++){
+particles.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+vx:(Math.random()-0.5)*1,
+vy:(Math.random()-0.5)*1
+});
+}
+
+function bg(){
+ctx.fillStyle="rgba(0,0,0,0.2)";
+ctx.fillRect(0,0,canvas.width,canvas.height);
+
+particles.forEach(p=>{
+p.x+=p.vx;
+p.y+=p.vy;
+
+if(p.x<0||p.x>canvas.width)p.vx*=-1;
+if(p.y<0||p.y>canvas.height)p.vy*=-1;
+
+ctx.fillStyle="white";
+ctx.fillRect(p.x,p.y,2,2);
+
+particles.forEach(p2=>{
+let dx=p.x-p2.x;
+let dy=p.y-p2.y;
+let dist=Math.sqrt(dx*dx+dy*dy);
+if(dist<100){
+ctx.strokeStyle="rgba(255,255,255,0.05)";
+ctx.beginPath();
+ctx.moveTo(p.x,p.y);
+ctx.lineTo(p2.x,p2.y);
+ctx.stroke();
+}
+});
+});
+
+requestAnimationFrame(bg);
+}
+bg();
+
+const text="DIMFIMA";
+const density=6;
+let parts=[];
+
+function init(){
+parts=[];
+let off=document.createElement("canvas");
+let octx=off.getContext("2d");
+off.width=800;
+off.height=200;
+
+octx.fillStyle="#fff";
+octx.font="bold 140px monospace";
+octx.textAlign="center";
+octx.fillText(text,400,140);
+
+let data=octx.getImageData(0,0,800,200).data;
+
+for(let y=0;y<200;y+=density){
+for(let x=0;x<800;x+=density){
+let i=(y*800+x)*4;
+if(data[i]>128){
+parts.push({
+x:Math.random()*canvas.width,
+y:Math.random()*canvas.height,
+tx:x+canvas.width/2-400,
+ty:y+canvas.height/2-100
+});
+}
+}
+}
+}
+init();
+
+const chars="NIGGER";
+
+function draw(){
+ctx.font="10px monospace";
+
+parts.forEach(p=>{
+p.x+=(p.tx-p.x)*0.06;
+p.y+=(p.ty-p.y)*0.06;
+
+ctx.fillStyle="white";
+ctx.fillText(chars[Math.floor(Math.random()*chars.length)],p.x,p.y);
+});
+
+requestAnimationFrame(draw);
+}
+draw();
+
+const cursor=document.getElementById("cursor");
+let mx=0,my=0,cx=0,cy=0;
+
+document.addEventListener("mousemove",e=>{
+mx=e.clientX;
+my=e.clientY;
+});
+
+function cursorAnim(){
+cx+=(mx-cx)*0.2;
+cy+=(my-cy)*0.2;
+
+cursor.style.left=cx+"px";
+cursor.style.top=cy+"px";
+
+requestAnimationFrame(cursorAnim);
+}
+cursorAnim();
+
+const phrases=[
+"ты намаслил свою штуку дрюку?",
+"fuck snickers",
+"нахуй социализацию, SP Tarkov лучше",
+"я тебе сейчас голова глаза сделаю",
+"ГАНДОН ТЫ ЕБУЧИЙ!",
+"свободного интренета не быть.",
+"смерть в нищите - Approved ☑"
+];
+
+let p=0;
+setInterval(()=>{
+p=(p+1)%phrases.length;
+document.getElementById("floating").textContent=phrases[p];
+},2500);
+
+const faces=["пошел","нахуй"];
+let f=0;
+setInterval(()=>{
+f=(f+1)%faces.length;
+document.title=faces[f];
+document.getElementById("title").textContent=faces[f];
+},2000);
+
+// Функции для выдвижных панелей
+function openPanel(panelId) {
+    document.getElementById(panelId).classList.add('open');
+}
+
+function closePanel(panelId) {
+    document.getElementById(panelId).classList.remove('open');
+}
+
+// Закрытие других панелей при открытии новой
+function togglePanel(panelId) {
+    const panels = ['panelRight', 'panelLeft', 'panelTop', 'panelBottom'];
+    panels.forEach(id => {
+        if (id !== panelId) {
+            closePanel(id);
+        }
+    });
+    const panel = document.getElementById(panelId);
+    if (panel.classList.contains('open')) {
+        closePanel(panelId);
+    } else {
+        openPanel(panelId);
+    }
+}
+
+// Назначаем кнопки
+document.getElementById('btnRight').onclick = () => togglePanel('panelRight');
+document.getElementById('btnLeft').onclick = () => togglePanel('panelLeft');
+document.getElementById('btnTop').onclick = () => togglePanel('panelTop');
+document.getElementById('btnBottom').onclick = () => togglePanel('panelBottom');
+
+// Закрытие по Escape
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        ['panelRight', 'panelLeft', 'panelTop', 'panelBottom'].forEach(closePanel);
+    }
+});
+
+window.onresize=()=>{
+canvas.width=innerWidth;
+canvas.height=innerHeight;
+init();
+};
+</script>
+
+</body>
+</html>
