@@ -56,167 +56,45 @@ text-align:center;
 opacity:0.7;
 }
 
-/* Кнопки выдвижения */
-.slide-btn {
+/* Контейнер для ссылок внизу */
+.links-bar {
 position: absolute;
-background: rgba(255,255,255,0.2);
-backdrop-filter: blur(10px);
-border: 1px solid rgba(255,255,255,0.3);
-color: white;
-font-family: monospace;
-font-size: 14px;
-padding: 12px 18px;
-border-radius: 30px;
-cursor: none;
-transition: 0.3s;
-z-index: 200;
-}
-
-.slide-btn:hover {
-background: rgba(255,255,255,0.4);
-transform: scale(1.05);
-}
-
-/* Позиции кнопок */
-.btn-right { right: 20px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; text-orientation: mixed; }
-.btn-left { left: 20px; top: 50%; transform: translateY(-50%); writing-mode: vertical-rl; text-orientation: mixed; }
-.btn-top { top: 20px; left: 50%; transform: translateX(-50%); }
-.btn-bottom { bottom: 20px; left: 50%; transform: translateX(-50%); }
-
-/* Выдвижные панели */
-.slide-panel {
-position: absolute;
-background: rgba(10,10,10,0.95);
-backdrop-filter: blur(15px);
-border: 1px solid rgba(255,255,255,0.2);
-transition: 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-z-index: 150;
-display: flex;
-flex-wrap: wrap;
-gap: 15px;
-padding: 20px;
-overflow-y: auto;
-}
-
-/* Правая панель */
-.panel-right {
-top: 0;
+bottom: 20px;
+left: 0;
 right: 0;
-width: 280px;
-height: 100%;
-transform: translateX(100%);
-flex-direction: column;
-}
-
-.panel-right.open { transform: translateX(0); }
-
-/* Левая панель */
-.panel-left {
-top: 0;
-left: 0;
-width: 280px;
-height: 100%;
-transform: translateX(-100%);
-flex-direction: column;
-}
-
-.panel-left.open { transform: translateX(0); }
-
-/* Верхняя панель */
-.panel-top {
-top: 0;
-left: 0;
-width: 100%;
-height: 250px;
-transform: translateY(-100%);
+display: flex;
 justify-content: center;
+gap: 20px;
+flex-wrap: wrap;
+padding: 15px;
+z-index: 100;
 }
 
-.panel-top.open { transform: translateY(0); }
-
-/* Нижняя панель */
-.panel-bottom {
-bottom: 0;
-left: 0;
-width: 100%;
-height: 250px;
-transform: translateY(100%);
-justify-content: center;
+.links-bar a {
+display: inline-flex;
+align-items: center;
+gap: 8px;
+color: rgba(255,255,255,0.8);
+text-decoration: none;
+font-size: 14px;
+font-family: monospace;
+transition: 0.3s;
+padding: 8px 15px;
+border-radius: 30px;
+background: rgba(255,255,255,0.08);
+backdrop-filter: blur(5px);
 }
 
-.panel-bottom.open { transform: translateY(0); }
-
-/* Картинки внутри панелей */
-.panel-item {
-text-align: center;
-cursor: none;
-transition: 0.2s;
-}
-
-.panel-item:hover {
-transform: scale(1.05);
-}
-
-.panel-item img {
-width: 200px;
-height: 200px;
-object-fit: cover;
-border-radius: 15px;
-border: 2px solid rgba(255,255,255,0.3);
-transition: 0.2s;
-}
-
-.panel-item img:hover {
-border-color: white;
-box-shadow: 0 0 15px rgba(255,255,255,0.3);
-}
-
-.panel-item span {
-display: block;
-margin-top: 8px;
-font-size: 12px;
-opacity: 0.8;
-}
-
-/* Закрыть панель */
-.close-panel {
-position: absolute;
-top: 10px;
-right: 15px;
-font-size: 24px;
-cursor: none;
-background: none;
-border: none;
-color: white;
-opacity: 0.7;
-transition: 0.2s;
-}
-
-.close-panel:hover {
-opacity: 1;
+.links-bar a:hover {
+background: rgba(255,255,255,0.2);
 transform: scale(1.1);
 }
 
-/* Для вертикальных панелей кнопка закрытия сверху */
-.panel-left .close-panel,
-.panel-right .close-panel {
-top: 10px;
-right: 15px;
-}
-
-/* Стилизация скролла */
-.slide-panel::-webkit-scrollbar {
-width: 5px;
-}
-
-.slide-panel::-webkit-scrollbar-track {
-background: rgba(255,255,255,0.1);
-border-radius: 10px;
-}
-
-.slide-panel::-webkit-scrollbar-thumb {
-background: rgba(255,255,255,0.4);
-border-radius: 10px;
+.links-bar img {
+width: 32px;
+height: 32px;
+border-radius: 50%;
+object-fit: cover;
 }
 
 .cursor{
@@ -239,44 +117,22 @@ z-index: 9999;
 <div id="floating"></div>
 <div id="ascii"></div>
 
-<!-- Кнопки выдвижения -->
-<button class="slide-btn btn-right" id="btnRight">▶ ВЫДВИНУТЬ ◀</button>
-<button class="slide-btn btn-left" id="btnLeft">◀ ВЫДВИНУТЬ ▶</button>
-<button class="slide-btn btn-top" id="btnTop">▲ ВЫДВИНУТЬ ▼</button>
-<button class="slide-btn btn-bottom" id="btnBottom">▼ ВЫДВИНУТЬ ▲</button>
-
-<!-- Правая панель -->
-<div class="slide-panel panel-right" id="panelRight">
-    <button class="close-panel" onclick="closePanel('panelRight')">✕</button>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/02/7c/9b/027c9b517fb3e8f0c4780b56b9146fbc.jpg"><span>🚫 18+</span></div>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/23/a4/e0/23a4e0663943e95c68effb4d202ddbb9.jpg"><span>🎶 SOUNDCLOUD</span></div>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/b4/41/7e/b4417e4fbfff2e229152c5f8ebcfed03.jpg"><span>💬 TELEGRAM</span></div>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/c0/63/32/c06332b424e199f80eca0dea00210e01.jpg"><span>🎮 DIMFIMA</span></div>
-</div>
-
-<!-- Левая панель -->
-<div class="slide-panel panel-left" id="panelLeft">
-    <button class="close-panel" onclick="closePanel('panelLeft')">✕</button>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/02/7c/9b/027c9b517fb3e8f0c4780b56b9146fbc.jpg"><span>🚫 18+</span></div>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/23/a4/e0/23a4e0663943e95c68effb4d202ddbb9.jpg"><span>🎶 MUSIC</span></div>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/b4/41/7e/b4417e4fbfff2e229152c5f8ebcfed03.jpg"><span>💬 CHAT</span></div>
-</div>
-
-<!-- Верхняя панель -->
-<div class="slide-panel panel-top" id="panelTop">
-    <button class="close-panel" onclick="closePanel('panelTop')">✕</button>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/02/7c/9b/027c9b517fb3e8f0c4780b56b9146fbc.jpg"><span>18+</span></div>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/23/a4/e0/23a4e0663943e95c68effb4d202ddbb9.jpg"><span>SOUNDCLOUD</span></div>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/b4/41/7e/b4417e4fbfff2e229152c5f8ebcfed03.jpg"><span>TELEGRAM</span></div>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/c0/63/32/c06332b424e199f80eca0dea00210e01.jpg"><span>DIMFIMA</span></div>
-</div>
-
-<!-- Нижняя панель -->
-<div class="slide-panel panel-bottom" id="panelBottom">
-    <button class="close-panel" onclick="closePanel('panelBottom')">✕</button>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/02/7c/9b/027c9b517fb3e8f0c4780b56b9146fbc.jpg"><span>18+</span></div>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/23/a4/e0/23a4e0663943e95c68effb4d202ddbb9.jpg"><span>SOUNDCLOUD</span></div>
-    <div class="panel-item"><img src="https://i.pinimg.com/736x/b4/41/7e/b4417e4fbfff2e229152c5f8ebcfed03.jpg"><span>TELEGRAM</span></div>
+<div class="links-bar">
+    <a href="https://share.podso.su/stream/lksfnd" target="_blank">
+        <img src="https://i.pinimg.com/736x/02/7c/9b/027c9b517fb3e8f0c4780b56b9146fbc.jpg">
+        <span>🚫18+</span>
+    </a>
+    
+    <a href="https://soundcloud.com/dimfima" target="_blank">
+        <img src="https://i.pinimg.com/736x/23/a4/e0/23a4e0663943e95c68effb4d202ddbb9.jpg">
+        <span>🎶 SOUNDCLOUD</span>
+    </a>
+    
+    <a href="https://t.me/dimfimalox" target="_blank">
+        <img src="https://i.pinimg.com/736x/b4/41/7e/b4417e4fbfff2e229152c5f8ebcfed03.jpg">
+        <span>💬 TELEGRAM</span>
+    </a>
+    
 </div>
 
 <div class="cursor" id="cursor"></div>
@@ -422,44 +278,6 @@ f=(f+1)%faces.length;
 document.title=faces[f];
 document.getElementById("title").textContent=faces[f];
 },2000);
-
-// Функции для выдвижных панелей
-function openPanel(panelId) {
-    document.getElementById(panelId).classList.add('open');
-}
-
-function closePanel(panelId) {
-    document.getElementById(panelId).classList.remove('open');
-}
-
-// Закрытие других панелей при открытии новой
-function togglePanel(panelId) {
-    const panels = ['panelRight', 'panelLeft', 'panelTop', 'panelBottom'];
-    panels.forEach(id => {
-        if (id !== panelId) {
-            closePanel(id);
-        }
-    });
-    const panel = document.getElementById(panelId);
-    if (panel.classList.contains('open')) {
-        closePanel(panelId);
-    } else {
-        openPanel(panelId);
-    }
-}
-
-// Назначаем кнопки
-document.getElementById('btnRight').onclick = () => togglePanel('panelRight');
-document.getElementById('btnLeft').onclick = () => togglePanel('panelLeft');
-document.getElementById('btnTop').onclick = () => togglePanel('panelTop');
-document.getElementById('btnBottom').onclick = () => togglePanel('panelBottom');
-
-// Закрытие по Escape
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        ['panelRight', 'panelLeft', 'panelTop', 'panelBottom'].forEach(closePanel);
-    }
-});
 
 window.onresize=()=>{
 canvas.width=innerWidth;
