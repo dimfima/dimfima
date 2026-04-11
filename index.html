@@ -37,6 +37,8 @@ line-height:10px;
 white-space:pre;
 text-align:center;
 filter:drop-shadow(0 0 12px #aaa);
+pointer-events: none;
+z-index: 10;
 }
 
 #floating{
@@ -46,6 +48,7 @@ width:100%;
 text-align:center;
 font-size:14px;
 opacity:0.5;
+z-index: 10;
 }
 
 #title{
@@ -54,9 +57,9 @@ top:10px;
 width:100%;
 text-align:center;
 opacity:0.7;
+z-index: 10;
 }
 
-/* Контейнер для ссылок внизу */
 .links-bar {
 position: absolute;
 bottom: 20px;
@@ -132,7 +135,6 @@ z-index: 9999;
         <img src="https://i.pinimg.com/736x/b4/41/7e/b4417e4fbfff2e229152c5f8ebcfed03.jpg">
         <span>💬 TELEGRAM</span>
     </a>
-    
 </div>
 
 <div class="cursor" id="cursor"></div>
@@ -143,13 +145,14 @@ const ctx=canvas.getContext("2d");
 canvas.width=innerWidth;
 canvas.height=innerHeight;
 
+// Частицы фона
 let particles=[];
 for(let i=0;i<120;i++){
 particles.push({
 x:Math.random()*canvas.width,
 y:Math.random()*canvas.height,
-vx:(Math.random()-0.5)*1,
-vy:(Math.random()-0.5)*1
+vx:(Math.random()-0.5)*1.5,
+vy:(Math.random()-0.5)*1.5
 });
 }
 
@@ -185,57 +188,135 @@ requestAnimationFrame(bg);
 }
 bg();
 
-const text="DIMFIMA";
-const density=6;
-let parts=[];
+// ========== ТЕКСТЫ ДЛЯ СМЕНЫ ==========
+const textList = [
+    "DIMFIMA",
+    "SPT <3",
+    "NIGGA",
+    "SOCIALIZE",
+    "WHO AM I?"
+];
 
-function init(){
-parts=[];
-let off=document.createElement("canvas");
-let octx=off.getContext("2d");
-off.width=800;
-off.height=200;
+let currentTextIndex = 0;
+let currentText = textList[0];
+// =======================================
 
-octx.fillStyle="#fff";
-octx.font="bold 140px monospace";
-octx.textAlign="center";
-octx.fillText(text,400,140);
+const density = 5; // Меньше = больше частиц, больше = меньше частиц
+let textParts = []; // Частицы для текста
+const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+=?/\\|[]{}()";
 
-let data=octx.getImageData(0,0,800,200).data;
-
-for(let y=0;y<200;y+=density){
-for(let x=0;x<800;x+=density){
-let i=(y*800+x)*4;
-if(data[i]>128){
-parts.push({
-x:Math.random()*canvas.width,
-y:Math.random()*canvas.height,
-tx:x+canvas.width/2-400,
-ty:y+canvas.height/2-100
-});
+// Получить позиции символов текста
+function getTextPositions(text, canvasWidth, canvasHeight) {
+    let off = document.createElement("canvas");
+    let octx = off.getContext("2d");
+    off.width = 800;
+    off.height = 200;
+    
+    octx.fillStyle = "#fff";
+    octx.font = "bold 140px monospace";
+    octx.textAlign = "center";
+    octx.fillText(text, 400, 140);
+    
+    let data = octx.getImageData(0, 0, 800, 200).data;
+    let positions = [];
+    
+    for(let y = 0; y < 200; y += density){
+        for(let x = 0; x < 800; x += density){
+            let i = (y * 800 + x) * 4;
+            if(data[i] > 128){
+                positions.push({
+                    tx: x + canvasWidth/2 - 400,
+                    ty: y + canvasHeight/2 - 100
+                });
+            }
+        }
+    }
+    return positions;
 }
+
+// Создать или обновить частицы текста
+function updateText(newText) {
+    let positions = getTextPositions(newText, canvas.width, canvas.height);
+    
+    if(textParts.length === 0) {
+        // Первое создание
+        for(let i = 0; i < positions.length; i++){
+            textParts.push({
+                x: Math.random() * canvas.width,
+                y: Math.random() * canvas.height,
+                tx: positions[i].tx,
+                ty: positions[i].ty,
+                currentChar: chars[Math.floor(Math.random() * chars.length)],
+                charTimer: Math.random() * 50 // Рандомный таймер для смены символа
+            });
+        }
+    } else {
+        // Обновление существующих частиц
+        // Обновляем target позиции
+        for(let i = 0; i < textParts.length && i < positions.length; i++) {
+            textParts[i].tx = positions[i].tx;
+            textParts[i].ty = positions[i].ty;
+        }
+        
+        // Добавляем новые частицы если нужно
+        if(positions.length > textParts.length) {
+            for(let i = textParts.length; i < positions.length; i++) {
+                textParts.push({
+                    x: Math.random() * canvas.width,
+                    y: Math.random() * canvas.height,
+                    tx: positions[i].tx,
+                    ty: positions[i].ty,
+                    currentChar: chars[Math.floor(Math.random() * chars.length)],
+                    charTimer: Math.random() * 50
+                });
+            }
+        }
+        // Удаляем лишние частицы
+        else if(positions.length < textParts.length) {
+            textParts = textParts.slice(0, positions.length);
+        }
+    }
 }
+
+// Функция смены текста с анимацией
+function changeText() {
+    currentTextIndex = (currentTextIndex + 1) % textList.length;
+    currentText = textList[currentTextIndex];
+    updateText(currentText);
 }
+
+// Анимация текста
+function animateText() {
+    if(textParts.length === 0) return;
+    
+    textParts.forEach(p => {
+        // Движение к цели (увеличил скорость с 0.06 до 0.12)
+        p.x += (p.tx - p.x) * 0.12;
+        p.y += (p.ty - p.y) * 0.12;
+        
+        // Частая смена символов для мерцания (увеличил частоту)
+        if(Math.random() < 0.15) {
+            p.currentChar = chars[Math.floor(Math.random() * chars.length)];
+        }
+        
+        ctx.fillStyle = "white";
+        ctx.font = "11px monospace";
+        ctx.fillText(p.currentChar, p.x, p.y);
+    });
+    
+    requestAnimationFrame(animateText);
 }
-init();
 
-const chars="NIGGER";
+// Инициализация
+updateText(currentText);
+animateText();
 
-function draw(){
-ctx.font="10px monospace";
+// Смена текста каждые 4 секунды
+setInterval(() => {
+    changeText();
+}, 4000);
 
-parts.forEach(p=>{
-p.x+=(p.tx-p.x)*0.06;
-p.y+=(p.ty-p.y)*0.06;
-
-ctx.fillStyle="white";
-ctx.fillText(chars[Math.floor(Math.random()*chars.length)],p.x,p.y);
-});
-
-requestAnimationFrame(draw);
-}
-draw();
-
+// Курсор
 const cursor=document.getElementById("cursor");
 let mx=0,my=0,cx=0,cy=0;
 
@@ -255,6 +336,7 @@ requestAnimationFrame(cursorAnim);
 }
 cursorAnim();
 
+// Плавающие фразы
 const phrases=[
 "ты намаслил свою штуку дрюку?",
 "fuck snickers",
@@ -271,6 +353,7 @@ p=(p+1)%phrases.length;
 document.getElementById("floating").textContent=phrases[p];
 },2500);
 
+// Мигающий тайтл
 const faces=["пошел","нахуй"];
 let f=0;
 setInterval(()=>{
@@ -279,10 +362,11 @@ document.title=faces[f];
 document.getElementById("title").textContent=faces[f];
 },2000);
 
+// Ресайз окна
 window.onresize=()=>{
 canvas.width=innerWidth;
 canvas.height=innerHeight;
-init();
+updateText(currentText);
 };
 </script>
 
