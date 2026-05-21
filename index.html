@@ -3,368 +3,627 @@
 <head>
 <meta charset="UTF-8">
 <title>СУКА</title>
-
 <link rel="icon" type="image/png" href="https://i.pinimg.com/736x/c0/63/32/c06332b424e199f80eca0dea00210e01.jpg">
-
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+
+*{box-sizing:border-box;margin:0;padding:0;}
+
 html,body{
-margin:0;
-padding:0;
-background:#050505;
-overflow:hidden;
-font-family:monospace;
-color:#fff;
-cursor: none;
+  background:#050505;
+  overflow:hidden;
+  font-family:'Share Tech Mono',monospace;
+  color:#fff;
+  cursor:none;
+  width:100%;height:100%;
 }
 
-a, a:hover, a:active, a:visited, button, img, div, span, [onclick] {
-cursor: none !important;
-}
+canvas{position:fixed;top:0;left:0;z-index:0;}
 
-canvas{
-position:fixed;
-top:0;
-left:0;
-}
-
-#ascii{
-position:absolute;
-top:50%;
-left:50%;
-transform:translate(-50%,-50%);
-font-size:10px;
-line-height:10px;
-white-space:pre;
-text-align:center;
-filter:drop-shadow(0 0 12px #aaa);
-pointer-events: none;
-z-index: 10;
-}
-
-#floating{
-position:absolute;
-top:22%;
-width:100%;
-text-align:center;
-font-size:14px;
-opacity:0.5;
-z-index: 10;
+#scanlines{
+  position:fixed;top:0;left:0;width:100%;height:100%;
+  background:repeating-linear-gradient(
+    0deg,
+    transparent,transparent 2px,
+    rgba(0,0,0,0.13) 2px,rgba(0,0,0,0.13) 4px
+  );
+  pointer-events:none;z-index:5;
 }
 
 #title{
-position:absolute;
-top:10px;
-width:100%;
-text-align:center;
-opacity:0.7;
-z-index: 10;
+  position:absolute;
+  top:12px;width:100%;
+  text-align:center;
+  font-size:13px;
+  letter-spacing:4px;
+  opacity:0.6;
+  z-index:10;
+  text-transform:uppercase;
 }
 
-.links-bar {
-position: absolute;
-bottom: 20px;
-left: 0;
-right: 0;
-display: flex;
-justify-content: center;
-gap: 20px;
-flex-wrap: wrap;
-padding: 15px;
-z-index: 100;
+#floating{
+  position:absolute;
+  top:22%;width:100%;
+  text-align:center;
+  font-size:13px;
+  opacity:0.35;
+  z-index:10;
+  letter-spacing:2px;
 }
 
-.links-bar a {
-display: inline-flex;
-align-items: center;
-gap: 8px;
-color: rgba(255,255,255,0.8);
-text-decoration: none;
-font-size: 14px;
-font-family: monospace;
-transition: 0.3s;
-padding: 8px 15px;
-border-radius: 30px;
-background: rgba(255,255,255,0.08);
-backdrop-filter: blur(5px);
+.links-bar{
+  position:absolute;
+  bottom:20px;left:0;right:0;
+  display:flex;
+  justify-content:center;
+  gap:20px;
+  flex-wrap:wrap;
+  padding:15px;
+  z-index:100;
+}
+.links-bar a{
+  display:inline-flex;align-items:center;gap:8px;
+  color:rgba(255,255,255,0.8);
+  text-decoration:none;
+  font-size:14px;
+  font-family:'Share Tech Mono',monospace;
+  padding:8px 15px;
+  border-radius:30px;
+  background:rgba(255,255,255,0.08);
+  backdrop-filter:blur(5px);
+  transition:0.3s;
+  cursor:none;
+}
+.links-bar a:hover{
+  background:rgba(255,255,255,0.2);
+  transform:scale(1.1);
+}
+.links-bar img{
+  width:32px;height:32px;
+  border-radius:50%;
+  object-fit:cover;
 }
 
-.links-bar a:hover {
-background: rgba(255,255,255,0.2);
-transform: scale(1.1);
+/* ── ПЛЕЕР ── */
+#player{
+  position:absolute;
+  right:28px;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+  z-index:100;
 }
 
-.links-bar img {
-width: 32px;
-height: 32px;
-border-radius: 50%;
-object-fit: cover;
+#play-btn{
+  width:40px;height:40px;
+  border-radius:50%;
+  background:rgba(255,255,255,0.06);
+  border:1px solid rgba(255,255,255,0.18);
+  color:#fff;
+  display:flex;align-items:center;justify-content:center;
+  cursor:none;
+  transition:.2s;
+  user-select:none;
+  backdrop-filter:blur(4px);
+  flex-shrink:0;
 }
+#play-btn:hover{
+  background:rgba(255,60,60,0.18);
+  border-color:rgba(255,60,60,0.5);
+  box-shadow:0 0 16px rgba(255,40,40,0.3);
+}
+/* SVG иконки одинакового размера */
+#play-btn svg{
+  width:14px;height:14px;
+  display:block;
+  flex-shrink:0;
+}
+
+/* ── ШКАЛА ГРОМКОСТИ ── */
+#vol-wrap{
+  display:flex;flex-direction:column;align-items:center;gap:6px;
+}
+#vol-label{
+  font-size:8px;letter-spacing:3px;opacity:0.35;text-transform:uppercase;
+}
+#vol-track{
+  width:4px;height:130px;
+  background:rgba(255,255,255,0.07);
+  border-radius:4px;position:relative;cursor:none;
+  border:1px solid rgba(255,255,255,0.07);
+}
+#vol-fill{
+  position:absolute;bottom:0;left:0;right:0;border-radius:4px;
+  background:linear-gradient(to top,rgba(255,30,30,1),rgba(255,140,0,0.85),rgba(255,255,80,0.7),rgba(200,255,200,0.5));
+  box-shadow:0 0 10px rgba(255,60,60,0.6);
+  transition:height .06s;
+}
+#vol-thumb{
+  position:absolute;left:50%;transform:translate(-50%,50%);
+  width:14px;height:5px;background:#fff;border-radius:3px;
+  box-shadow:0 0 10px rgba(255,255,255,0.9),0 0 3px #f44;
+  cursor:none;
+}
+#vol-pct{font-size:9px;letter-spacing:1px;opacity:0.3;}
 
 .cursor{
-position:fixed;
-width:22px;
-height:22px;
-border-radius:50%;
-pointer-events:none;
-background:radial-gradient(circle, rgba(255,255,255,0.6), rgba(200,200,200,0.3), transparent);
-mix-blend-mode:difference;
-z-index: 9999;
+  position:fixed;width:20px;height:20px;border-radius:50%;
+  pointer-events:none;
+  background:radial-gradient(circle,rgba(255,60,60,0.65),rgba(200,200,200,0.15),transparent);
+  mix-blend-mode:difference;z-index:9999;
+}
+
+/* ── ИНФО О ТРЕКЕ ── */
+#track-info{
+  position:absolute;
+  right:28px;
+  top:50%;
+  transform:translateY(-50%);
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:14px;
+  z-index:100;
+}
+
+#track-card{
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  gap:6px;
+}
+
+#track-cover{
+  width:46px;height:46px;
+  border-radius:4px;
+  object-fit:cover;
+  border:1px solid rgba(255,255,255,0.12);
+  filter:grayscale(20%);
+  box-shadow:0 0 12px rgba(0,0,0,0.6);
+}
+
+#track-name{
+  font-size:8px;
+  letter-spacing:1.5px;
+  opacity:0.5;
+  text-align:center;
+  max-width:70px;
+  line-height:1.4;
+  text-transform:uppercase;
+  word-break:break-word;
+}
+
+#track-artist{
+  font-size:7px;
+  letter-spacing:1px;
+  opacity:0.3;
+  text-align:center;
+  text-transform:uppercase;
 }
 </style>
 </head>
 <body>
 
 <canvas id="bg"></canvas>
+<div id="scanlines"></div>
 
-<div id="title">СУКА</div>
+<div id="title">DIMFIMA</div>
 <div id="floating"></div>
-<div id="ascii"></div>
+
+<audio id="audio" loop preload="auto">
+  <source src="https://dl.dropboxusercontent.com/scl/fi/mgrvkw0ef4fdy77ixycqt/c6540ea2-0758-4482-becd-bd2207de862a_Sewerslvt-sick-twisted.mp3?rlkey=81209ndiu47vw7pk4lobiw7n7" type="audio/mpeg">
+</audio>
+
+<div id="player">
+  <!-- Обложка и название трека — замени src и текст на свои -->
+  <div id="track-card">
+    <img id="track-cover" src="https://i.pinimg.com/1200x/77/c8/9b/77c89b21841e213f421d9eaf5db69472.jpg" alt="cover">
+    <div id="track-name">sick, twisted, demented</div>
+    <div id="track-artist">Sewerslvt</div>
+  </div>
+  <div id="vol-wrap">
+    <div id="vol-label">VOL</div>
+    <div id="vol-track">
+      <div id="vol-fill"></div>
+      <div id="vol-thumb"></div>
+    </div>
+    <div id="vol-pct">20%</div>
+  </div>
+  <div id="play-btn">
+    <!-- play icon (default) -->
+    <svg id="icon-play" viewBox="0 0 14 14" fill="white" xmlns="http://www.w3.org/2000/svg">
+      <polygon points="2,1 13,7 2,13"/>
+    </svg>
+    <!-- pause icon (hidden) -->
+    <svg id="icon-pause" viewBox="0 0 14 14" fill="white" xmlns="http://www.w3.org/2000/svg" style="display:none">
+      <rect x="2" y="1" width="3.5" height="12" rx="1"/>
+      <rect x="8.5" y="1" width="3.5" height="12" rx="1"/>
+    </svg>
+  </div>
+</div>
 
 <div class="links-bar">
-    <a href="https://share.podso.su/stream/lksfnd" target="_blank">
-        <img src="https://i.pinimg.com/736x/02/7c/9b/027c9b517fb3e8f0c4780b56b9146fbc.jpg">
-        <span>🚫 18+</span>
-    </a>
-    
-    <a href="https://soundcloud.com/dimfima" target="_blank">
-        <img src="https://i.pinimg.com/736x/23/a4/e0/23a4e0663943e95c68effb4d202ddbb9.jpg">
-        <span>🎶 SOUNDCLOUD</span>
-    </a>
-    
-    <a href="https://t.me/dimfimalox" target="_blank">
-        <img src="https://i.pinimg.com/736x/b4/41/7e/b4417e4fbfff2e229152c5f8ebcfed03.jpg">
-        <span>💬 TELEGRAM</span>
-    </a>
+  <a href="https://steamcommunity.com/id/DimFima/" target="_blank">
+    <img src="https://i.pinimg.com/1200x/9e/cd/89/9ecd89bcc35fe3666ca1c61e8b58814a.jpg">
+    <span>STEAM PROFILE</span>
+  </a>
 </div>
 
 <div class="cursor" id="cursor"></div>
 
 <script>
+/* ══ CANVAS ══ */
 const canvas=document.getElementById("bg");
 const ctx=canvas.getContext("2d");
 canvas.width=innerWidth;
 canvas.height=innerHeight;
 
-// Частицы фона
+let offC=document.createElement("canvas");
+offC.width=canvas.width;offC.height=canvas.height;
+let offCtx=offC.getContext("2d");
+
+/* ══ ЧАСТИЦЫ ══ */
 let particles=[];
-for(let i=0;i<120;i++){
-particles.push({
-x:Math.random()*canvas.width,
-y:Math.random()*canvas.height,
-vx:(Math.random()-0.5)*1.5,
-vy:(Math.random()-0.5)*1.5
-});
+function spawnParticles(){
+  particles=[];
+  for(let i=0;i<200;i++)
+    particles.push({
+      x:Math.random()*canvas.width,y:Math.random()*canvas.height,
+      vx:(Math.random()-.5)*1.4,vy:(Math.random()-.5)*1.4,
+      size:Math.random()<0.12?3:1,bright:Math.random()
+    });
 }
+spawnParticles();
 
-function bg(){
-ctx.fillStyle="rgba(0,0,0,0.2)";
-ctx.fillRect(0,0,canvas.width,canvas.height);
+/* ══ ТЕКСТОВЫЕ ЧАСТИЦЫ ══ */
+const density=5;
+const chars="ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+=?/\\|[]{}()<>!~^";
+const textList=["DIMFIMA","BREAKCORE","SEWERSLVT","NUH UH","HELLO?"];
+let tIdx=0;
+let textParts=[];
 
-particles.forEach(p=>{
-p.x+=p.vx;
-p.y+=p.vy;
-
-if(p.x<0||p.x>canvas.width)p.vx*=-1;
-if(p.y<0||p.y>canvas.height)p.vy*=-1;
-
-ctx.fillStyle="white";
-ctx.fillRect(p.x,p.y,2,2);
-
-particles.forEach(p2=>{
-let dx=p.x-p2.x;
-let dy=p.y-p2.y;
-let dist=Math.sqrt(dx*dx+dy*dy);
-if(dist<100){
-ctx.strokeStyle="rgba(255,255,255,0.05)";
-ctx.beginPath();
-ctx.moveTo(p.x,p.y);
-ctx.lineTo(p2.x,p2.y);
-ctx.stroke();
-}
-});
-});
-
-requestAnimationFrame(bg);
-}
-bg();
-
-// ========== ТЕКСТЫ ДЛЯ СМЕНЫ ==========
-const textList = [
-    "DIMFIMA",
-    "BREAKCORE",
-    "SEWERSLVT",
-    "NUH UH",
-    "WHO AM I?"
+// Палитра глитч-цветов для символов
+const glitchPalette=[
+  "rgba(255,30,80,1)",
+  "rgba(0,255,180,1)",
+  "rgba(255,220,0,1)",
+  "rgba(180,0,255,1)",
+  "rgba(0,180,255,1)",
+  "rgba(255,255,255,1)"
 ];
 
-let currentTextIndex = 0;
-let currentText = textList[0];
-// =======================================
-
-const density = 5; // Меньше = больше частиц, больше = меньше частиц
-let textParts = []; // Частицы для текста
-const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+=?/\\|[]{}()";
-
-// Получить позиции символов текста
-function getTextPositions(text, canvasWidth, canvasHeight) {
-    let off = document.createElement("canvas");
-    let octx = off.getContext("2d");
-    off.width = 800;
-    off.height = 200;
-    
-    octx.fillStyle = "#fff";
-    octx.font = "bold 140px monospace";
-    octx.textAlign = "center";
-    octx.fillText(text, 400, 140);
-    
-    let data = octx.getImageData(0, 0, 800, 200).data;
-    let positions = [];
-    
-    for(let y = 0; y < 200; y += density){
-        for(let x = 0; x < 800; x += density){
-            let i = (y * 800 + x) * 4;
-            if(data[i] > 128){
-                positions.push({
-                    tx: x + canvasWidth/2 - 400,
-                    ty: y + canvasHeight/2 - 100
-                });
-            }
-        }
+function getTextPositions(text){
+  let off=document.createElement("canvas");
+  off.width=800;off.height=200;
+  let oc=off.getContext("2d");
+  oc.fillStyle="#fff";
+  oc.font="bold 140px monospace";
+  oc.textAlign="center";
+  oc.fillText(text,400,140);
+  let data=oc.getImageData(0,0,800,200).data;
+  let pos=[];
+  for(let y=0;y<200;y+=density)
+    for(let x=0;x<800;x+=density){
+      let i=(y*800+x)*4;
+      if(data[i]>128) pos.push({tx:x+canvas.width/2-400,ty:y+canvas.height/2-100});
     }
-    return positions;
+  return pos;
 }
 
-// Создать или обновить частицы текста
-function updateText(newText) {
-    let positions = getTextPositions(newText, canvas.width, canvas.height);
-    
-    if(textParts.length === 0) {
-        // Первое создание
-        for(let i = 0; i < positions.length; i++){
-            textParts.push({
-                x: Math.random() * canvas.width,
-                y: Math.random() * canvas.height,
-                tx: positions[i].tx,
-                ty: positions[i].ty,
-                currentChar: chars[Math.floor(Math.random() * chars.length)],
-                charTimer: Math.random() * 50 // Рандомный таймер для смены символа
-            });
-        }
-    } else {
-        // Обновление существующих частиц
-        // Обновляем target позиции
-        for(let i = 0; i < textParts.length && i < positions.length; i++) {
-            textParts[i].tx = positions[i].tx;
-            textParts[i].ty = positions[i].ty;
-        }
-        
-        // Добавляем новые частицы если нужно
-        if(positions.length > textParts.length) {
-            for(let i = textParts.length; i < positions.length; i++) {
-                textParts.push({
-                    x: Math.random() * canvas.width,
-                    y: Math.random() * canvas.height,
-                    tx: positions[i].tx,
-                    ty: positions[i].ty,
-                    currentChar: chars[Math.floor(Math.random() * chars.length)],
-                    charTimer: Math.random() * 50
-                });
-            }
-        }
-        // Удаляем лишние частицы
-        else if(positions.length < textParts.length) {
-            textParts = textParts.slice(0, positions.length);
-        }
-    }
+function updateText(text){
+  let pos=getTextPositions(text);
+  if(!textParts.length){
+    textParts=pos.map(p=>({
+      x:Math.random()*canvas.width,y:Math.random()*canvas.height,
+      tx:p.tx,ty:p.ty,
+      ch:chars[Math.floor(Math.random()*chars.length)],
+      col:"rgba(255,255,255,0.92)",
+      glitchCol:null,
+      glitchColTimer:0,
+      // сдвиг символа
+      shiftX:0,shiftY:0,shiftTimer:0
+    }));
+  } else {
+    let n=Math.min(textParts.length,pos.length);
+    for(let i=0;i<n;i++){textParts[i].tx=pos[i].tx;textParts[i].ty=pos[i].ty;}
+    if(pos.length>textParts.length)
+      for(let i=textParts.length;i<pos.length;i++)
+        textParts.push({
+          x:Math.random()*canvas.width,y:Math.random()*canvas.height,
+          tx:pos[i].tx,ty:pos[i].ty,
+          ch:chars[Math.floor(Math.random()*chars.length)],
+          col:"rgba(255,255,255,0.92)",
+          glitchCol:null,glitchColTimer:0,
+          shiftX:0,shiftY:0,shiftTimer:0
+        });
+    else textParts=textParts.slice(0,pos.length);
+  }
 }
+updateText(textList[0]);
+setInterval(()=>{tIdx=(tIdx+1)%textList.length;updateText(textList[tIdx]);},4000);
 
-// Функция смены текста с анимацией
-function changeText() {
-    currentTextIndex = (currentTextIndex + 1) % textList.length;
-    currentText = textList[currentTextIndex];
-    updateText(currentText);
-}
+/* ══ ГЛИТЧ СОСТОЯНИЕ ══ */
+let glitchActive=false;
+let glitchTimer=0;
+let glitchLines=[];
+let noiseLevel=0;
+let rgbAmount=0;
 
-// Анимация текста
-function animateText() {
-    if(textParts.length === 0) return;
-    
-    textParts.forEach(p => {
-        // Движение к цели (увеличил скорость с 0.06 до 0.12)
-        p.x += (p.tx - p.x) * 0.12;
-        p.y += (p.ty - p.y) * 0.12;
-        
-        // Частая смена символов для мерцания (увеличил частоту)
-        if(Math.random() < 0.15) {
-            p.currentChar = chars[Math.floor(Math.random() * chars.length)];
-        }
-        
-        ctx.fillStyle = "white";
-        ctx.font = "11px monospace";
-        ctx.fillText(p.currentChar, p.x, p.y);
+// Глитч-сдвиг ВСЕГО текстового блока (имитация сбоя монитора)
+let blockShiftX=0,blockShiftY=0,blockShiftTimer=0;
+let blockShiftActive=false;
+
+function triggerGlitch(){
+  glitchActive=true;
+  glitchTimer=10+Math.floor(Math.random()*22);
+  noiseLevel=0.06+Math.random()*0.14;
+  rgbAmount=4+Math.random()*16;
+
+  glitchLines=[];
+  let n=4+Math.floor(Math.random()*12);
+  for(let i=0;i<n;i++)
+    glitchLines.push({
+      y:Math.random()*canvas.height,
+      h:Math.random()<0.6?(1+Math.random()*8):(12+Math.random()*50),
+      dx:(Math.random()-.5)*120,
+      tinted:Math.random()<0.35
     });
-    
-    requestAnimationFrame(animateText);
+
+  // Раскрашиваем символы текста в разные цвета группами
+  // Делаем несколько "зон" цвета
+  let zoneCount=2+Math.floor(Math.random()*4);
+  textParts.forEach(p=>{
+    if(Math.random()<0.55){
+      // Этому символу достаётся глитч-цвет
+      p.glitchCol=glitchPalette[Math.floor(Math.random()*glitchPalette.length)];
+      p.glitchColTimer=glitchTimer+Math.floor(Math.random()*10);
+    }
+    // Иногда — сдвиг отдельного символа
+    if(Math.random()<0.12){
+      p.shiftX=(Math.random()-.5)*30;
+      p.shiftY=(Math.random()-.5)*10;
+      p.shiftTimer=3+Math.floor(Math.random()*8);
+    }
+  });
+
+  // Глобальный сдвиг блока текста (монитор дал сбой)
+  if(Math.random()<0.5){
+    blockShiftActive=true;
+    blockShiftX=(Math.random()-.5)*60;
+    blockShiftY=(Math.random()-.5)*20;
+    blockShiftTimer=4+Math.floor(Math.random()*10);
+  }
 }
 
-// Инициализация
-updateText(currentText);
-animateText();
+function scheduleGlitch(){
+  setTimeout(()=>{triggerGlitch();scheduleGlitch();},500+Math.random()*2200);
+}
+scheduleGlitch();
 
-// Смена текста каждые 4 секунды
-setInterval(() => {
-    changeText();
-}, 4000);
+/* ══ ГЛАВНЫЙ ЦИКЛ ══ */
+function draw(){
+  ctx.fillStyle="rgba(5,5,5,0.2)";
+  ctx.fillRect(0,0,canvas.width,canvas.height);
 
-// Курсор
+  /* Частицы */
+  particles.forEach(p=>{
+    p.x+=p.vx;p.y+=p.vy;
+    if(p.x<0||p.x>canvas.width)p.vx*=-1;
+    if(p.y<0||p.y>canvas.height)p.vy*=-1;
+    ctx.fillStyle=(glitchActive&&Math.random()<0.07)
+      ?(Math.random()<0.5?"rgba(255,30,80,0.9)":"rgba(30,255,180,0.9)")
+      :`rgba(255,255,255,${0.4+p.bright*0.5})`;
+    ctx.fillRect(p.x,p.y,p.size,p.size);
+  });
+
+  if(glitchActive){
+    /* Шум */
+    let cnt=Math.floor(canvas.width*canvas.height*noiseLevel*0.0012);
+    for(let i=0;i<cnt;i++){
+      let nx=Math.random()*canvas.width,ny=Math.random()*canvas.height;
+      let r=Math.random();
+      ctx.fillStyle=r<0.5?`rgba(255,255,255,${Math.random()*0.8})`
+        :r<0.75?`rgba(255,0,80,${Math.random()*0.65})`:`rgba(0,255,190,${Math.random()*0.65})`;
+      ctx.fillRect(nx,ny,Math.random()<0.2?Math.random()*5:1,Math.random()<0.08?Math.random()*10:1);
+    }
+
+    /* Горизонтальные полосы */
+    glitchLines.forEach(l=>{
+      let sy=Math.max(0,Math.floor(l.y)),sh=Math.min(Math.ceil(l.h),canvas.height-sy);
+      if(sh<1)return;
+      try{
+        let imgD=ctx.getImageData(0,sy,canvas.width,sh);
+        ctx.putImageData(imgD,l.dx,sy);
+        if(l.tinted){
+          ctx.fillStyle=Math.random()<0.5?"rgba(255,0,80,0.1)":"rgba(0,255,180,0.08)";
+          ctx.fillRect(0,sy,canvas.width,sh);
+        }
+      }catch(e){}
+    });
+
+    /* Вертикальные полосы */
+    if(Math.random()<0.45){
+      let lx=Math.random()*canvas.width;
+      ctx.fillStyle=Math.random()<0.5?"rgba(255,0,80,0.45)":"rgba(0,255,180,0.4)";
+      ctx.fillRect(lx,0,Math.random()<0.7?1:Math.random()*3,canvas.height);
+    }
+
+    /* RGB хроматический сдвиг — только через пиксели, без screen blend */
+    if(rgbAmount>0){
+      try{
+        let iw=canvas.width,ih=canvas.height;
+        let src=ctx.getImageData(0,0,iw,ih);
+        let dst=ctx.createImageData(iw,ih);
+        let sd=src.data,dd=dst.data;
+        let shift=Math.round(rgbAmount);
+        for(let y=0;y<ih;y++){
+          for(let x=0;x<iw;x++){
+            let di=(y*iw+x)*4;
+            // Red — берём из x+shift
+            let rx=Math.min(iw-1,x+shift);
+            let ri=(y*iw+rx)*4;
+            dd[di]  =sd[ri];
+            // Green — без сдвига
+            dd[di+1]=sd[(y*iw+x)*4+1];
+            // Blue — берём из x-shift
+            let bx=Math.max(0,x-shift);
+            let bi=(y*iw+bx)*4;
+            dd[di+2]=sd[bi+2];
+            dd[di+3]=sd[(y*iw+x)*4+3];
+          }
+        }
+        ctx.putImageData(dst,0,0);
+      }catch(e){}
+    }
+
+    glitchTimer--;
+    if(glitchTimer<=0){
+      glitchActive=false;
+      rgbAmount=0;noiseLevel=0;glitchLines=[];
+    }
+  }
+
+  /* Обновляем глобальный сдвиг блока */
+  if(blockShiftActive){
+    blockShiftTimer--;
+    if(blockShiftTimer<=0){
+      blockShiftActive=false;
+      blockShiftX=0;blockShiftY=0;
+    }
+  }
+
+  /* Текстовые частицы */
+  ctx.font="11px 'Share Tech Mono',monospace";
+  textParts.forEach(p=>{
+    p.x+=(p.tx-p.x)*0.12;
+    p.y+=(p.ty-p.y)*0.12;
+    if(Math.random()<0.14) p.ch=chars[Math.floor(Math.random()*chars.length)];
+
+    // Обновляем глитч-цвет символа
+    if(p.glitchColTimer>0){
+      p.glitchColTimer--;
+      // Иногда дёргаем цвет между глитч-цветами
+      if(Math.random()<0.2)
+        p.glitchCol=glitchPalette[Math.floor(Math.random()*glitchPalette.length)];
+      if(p.glitchColTimer<=0) p.glitchCol=null;
+    }
+
+    // Обновляем сдвиг символа
+    if(p.shiftTimer>0){
+      p.shiftTimer--;
+      if(p.shiftTimer<=0){p.shiftX=0;p.shiftY=0;}
+    }
+
+    // Итоговая позиция с учётом сдвигов
+    let drawX=p.x+p.shiftX+(blockShiftActive?blockShiftX:0);
+    let drawY=p.y+p.shiftY+(blockShiftActive?blockShiftY:0);
+
+    ctx.fillStyle=p.glitchCol?p.glitchCol:"rgba(255,255,255,0.92)";
+    ctx.fillText(p.ch,drawX,drawY);
+
+    // Если активен глитч-цвет — рисуем «эхо» символа со сдвигом для хроматики
+    if(p.glitchCol&&Math.random()<0.3){
+      ctx.globalAlpha=0.3;
+      ctx.fillStyle=glitchPalette[Math.floor(Math.random()*glitchPalette.length)];
+      ctx.fillText(p.ch,drawX+(Math.random()-.5)*6,drawY+(Math.random()-.5)*4);
+      ctx.globalAlpha=1;
+    }
+  });
+
+  requestAnimationFrame(draw);
+}
+draw();
+
+/* ══ АУДИО ══ */
+const audio=document.getElementById("audio");
+const playBtn=document.getElementById("play-btn");
+const iconPlay=document.getElementById("icon-play");
+const iconPause=document.getElementById("icon-pause");
+const volTrack=document.getElementById("vol-track");
+const volFill=document.getElementById("vol-fill");
+const volThumb=document.getElementById("vol-thumb");
+const volPct=document.getElementById("vol-pct");
+
+let volume=0.20,playing=false,dragging=false;
+audio.volume=volume;
+
+// Кривая громкости: слайдер 0-1 → реальная громкость через квадрат
+// При позиции 0.2 (20%) реальная громкость будет 0.2^2.5 ≈ 0.018 (очень тихо)
+// При позиции 0.5 (50%) → ~0.18, при 1.0 → 1.0
+function sliderToReal(v){ return Math.pow(v, 2.5); }
+function realToSlider(v){ return Math.pow(v, 1/2.5); }
+
+function setVolume(v){
+  volume=Math.max(0,Math.min(1,v));
+  audio.volume=sliderToReal(volume);
+  let pct=Math.round(volume*100);
+  let trackH=volTrack.offsetHeight;
+  let fillH=trackH*volume;
+  volFill.style.height=fillH+"px";
+  volThumb.style.bottom=(fillH-2.5)+"px";
+  volPct.textContent=pct+"%";
+}
+setVolume(volume);
+
+playBtn.addEventListener("click",()=>{
+  if(playing){
+    audio.pause();
+    iconPlay.style.display="block";
+    iconPause.style.display="none";
+    playing=false;
+  } else {
+    audio.play().catch(()=>{});
+    iconPlay.style.display="none";
+    iconPause.style.display="block";
+    playing=true;
+  }
+});
+
+function volFromEvent(e){
+  let rect=volTrack.getBoundingClientRect();
+  let cY=e.touches?e.touches[0].clientY:e.clientY;
+  setVolume(1-(cY-rect.top)/rect.height);
+}
+volTrack.addEventListener("mousedown",e=>{dragging=true;volFromEvent(e);});
+volTrack.addEventListener("touchstart",e=>{dragging=true;volFromEvent(e);},{passive:true});
+document.addEventListener("mousemove",e=>{if(dragging)volFromEvent(e);});
+document.addEventListener("touchmove",e=>{if(dragging)volFromEvent(e);},{passive:true});
+document.addEventListener("mouseup",()=>dragging=false);
+document.addEventListener("touchend",()=>dragging=false);
+
+/* ══ КУРСОР ══ */
 const cursor=document.getElementById("cursor");
 let mx=0,my=0,cx=0,cy=0;
+document.addEventListener("mousemove",e=>{mx=e.clientX;my=e.clientY;});
+(function cursorAnim(){
+  cx+=(mx-cx)*0.18;cy+=(my-cy)*0.18;
+  cursor.style.left=(cx-10)+"px";cursor.style.top=(cy-10)+"px";
+  requestAnimationFrame(cursorAnim);
+})();
 
-document.addEventListener("mousemove",e=>{
-mx=e.clientX;
-my=e.clientY;
-});
+/* ══ ФЛОАТИНГ ══ */
+const phrases=["пусто","empty","null","void","idk"];
+let pi=0;
+setInterval(()=>{pi=(pi+1)%phrases.length;document.getElementById("floating").textContent=phrases[pi];},2500);
 
-function cursorAnim(){
-cx+=(mx-cx)*0.2;
-cy+=(my-cy)*0.2;
-
-cursor.style.left=cx+"px";
-cursor.style.top=cy+"px";
-
-requestAnimationFrame(cursorAnim);
-}
-cursorAnim();
-
-// Плавающие фразы
-const phrases=[
-"пусто",
-"empty",
-"null"
-];
-
-let p=0;
-setInterval(()=>{
-p=(p+1)%phrases.length;
-document.getElementById("floating").textContent=phrases[p];
-},2500);
-
-// Мигающий тайтл
+/* ══ ТАЙТЛ ══ */
 const faces=["пиздуй","нахуй"];
-let f=0;
+let fi=0;
 setInterval(()=>{
-f=(f+1)%faces.length;
-document.title=faces[f];
-document.getElementById("title").textContent=faces[f];
+  fi=(fi+1)%faces.length;
+  document.title=faces[fi];
+  document.getElementById("title").textContent=faces[fi];
 },2000);
 
-// Ресайз окна
+/* ══ РЕСАЙЗ ══ */
 window.onresize=()=>{
-canvas.width=innerWidth;
-canvas.height=innerHeight;
-updateText(currentText);
+  canvas.width=innerWidth;canvas.height=innerHeight;
+  offC.width=canvas.width;offC.height=canvas.height;
+  spawnParticles();updateText(textList[tIdx]);setVolume(volume);
 };
 </script>
-
 </body>
 </html>
