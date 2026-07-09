@@ -1,1005 +1,939 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-<meta charset="UTF-8">
-<title>СУКА</title>
-<link rel="icon" type="image/png" href="https://i.pinimg.com/736x/e8/b7/3c/e8b73c40a405443d5eaf7ca761278ad5.jpg">
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <title>СУКА</title>
+  <link rel="icon" type="image/png" href="https://i.pinimg.com/736x/e8/b7/3c/e8b73c40a405443d5eaf7ca761278ad5.jpg">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&display=swap');
 
-*{
-  box-sizing:border-box;
-  margin:0;
-  padding:0;
-  -webkit-user-select:none;
-  -moz-user-select:none;
-  -ms-user-select:none;
-  user-select:none;
-  -webkit-tap-highlight-color:transparent;
-}
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
 
-img, a, div, span, button, p, h1, h2, h3, h4, h5, h6 {
-  -webkit-user-select:none;
-  -moz-user-select:none;
-  -ms-user-select:none;
-  user-select:none;
-  -webkit-user-drag:none;
-  -khtml-user-drag:none;
-  -moz-user-drag:none;
-  -o-user-drag:none;
-  user-drag:none;
-}
+    img, a, div, span, button, p, h1, h2, h3, h4, h5, h6 {
+      -webkit-user-drag: none;
+      user-drag: none;
+    }
 
-html,body{
-  background:#050505;
-  overflow:hidden;
-  font-family:'Share Tech Mono',monospace;
-  color:#fff;
-  width:100%;height:100%;
-  -webkit-user-select:none;
-  -moz-user-select:none;
-  -ms-user-select:none;
-  user-select:none;
-}
+    html {
+      background: #050505;
+      overflow: hidden;       /* убираем прокрутку */
+      height: 100%;
+    }
 
-html, body, html * {
-  cursor: none !important;
-}
+    body {
+      font-family: 'Share Tech Mono', monospace;
+      color: #fff;
+      background: #050505;
+      margin: 0;
+      padding: 0;
+      height: 100%;
+      overflow: hidden;
+      cursor: none;
+    }
 
-#main-content {
-  display: none;
-  width: 100%;
-  height: 100%;
-}
+    /* ── ГЛИТЧ‑ФОН ── */
+    #bg-canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
 
-canvas{position:fixed;top:0;left:0;z-index:0;}
+    #scanlines {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0, 0, 0, 0.13) 2px, rgba(0, 0, 0, 0.13) 4px);
+      pointer-events: none;
+      z-index: 6;
+    }
 
-#scanlines{
-  position:fixed;top:0;left:0;width:100%;height:100%;
-  background:repeating-linear-gradient(
-    0deg,
-    transparent,transparent 2px,
-    rgba(0,0,0,0.13) 2px,rgba(0,0,0,0.13) 4px
-  );
-  pointer-events:none;z-index:5;
-}
+    /* ── ТОЧКА-КУРСОР ── */
+    .cursor-dot {
+      position: fixed;
+      pointer-events: none;
+      z-index: 10000;
+      top: 0;
+      left: 0;
+      width: 12px;
+      height: 12px;
+      background: radial-gradient(circle, #c27aff 0%, #b026ff 70%, transparent 100%);
+      border-radius: 50%;
+      box-shadow: 0 0 15px #b026ff, 0 0 30px rgba(180, 0, 255, 0.7);
+      transform: translate(-50%, -50%);
+      transition: background 0.2s ease, box-shadow 0.2s ease;
+      will-change: transform;
+    }
 
-#title{
-  position:absolute;
-  top:12px;width:100%;
-  text-align:center;
-  font-size:13px;
-  letter-spacing:4px;
-  opacity:0.6;
-  z-index:10;
-  text-transform:uppercase;
-}
+    body.cursor-hover .cursor-dot {
+      width: 12px;
+      height: 12px;
+      animation: pulse-color 0.8s infinite alternate;
+    }
 
+    @keyframes pulse-color {
+      from {
+        background: radial-gradient(circle, #c27aff 0%, #b026ff 70%, transparent 100%);
+        box-shadow: 0 0 15px #b026ff, 0 0 30px rgba(180, 0, 255, 0.7);
+      }
+      to {
+        background: radial-gradient(circle, #e0b0ff 0%, #d040ff 70%, transparent 100%);
+        box-shadow: 0 0 25px #e0b0ff, 0 0 50px rgba(200, 0, 255, 1);
+      }
+    }
 
-.links-bar{
-  position:absolute;
-  bottom:20px;left:0;right:0;
-  display:flex;
-  justify-content:center;
-  gap:20px;
-  flex-wrap:wrap;
-  padding:15px;
-  z-index:100;
-}
-.links-bar a{
-  display:inline-flex;align-items:center;gap:8px;
-  color:rgba(255,255,255,0.8);
-  text-decoration:none;
-  font-size:14px;
-  font-family:'Share Tech Mono',monospace;
-  padding:8px 15px;
-  border-radius:30px;
-  background:rgba(255,255,255,0.08);
-  backdrop-filter:blur(5px);
-  transition:0.3s;
-}
-.links-bar a:hover{
-  background:rgba(255,255,255,0.2);
-  transform:scale(1.1);
-}
-.links-bar img{
-  width:32px;height:32px;
-  border-radius:50%;
-  object-fit:cover;
-  pointer-events:none;
-}
+    a, button, input[type="range"], .ctrl-btn, #enter-btn, #show-info-btn {
+      cursor: none;
+    }
 
-/* ── SPLASH SCREEN ── */
-#splash{
-  position:fixed;
-  top:0;left:0;width:100%;height:100%;
-  background:#000;
-  z-index:9999;
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  gap:30px;
-}
-#splash.hidden{
-  display:none;
-}
-#splash-title{
-  font-family:'Share Tech Mono',monospace;
-  font-size:48px;
-  letter-spacing:12px;
-  color:rgba(255,255,255,0.9);
-  text-shadow:0 0 20px rgba(255,40,40,0.5),0 0 60px rgba(255,40,40,0.3);
-}
-#enter-btn{
-  font-family:'Share Tech Mono',monospace;
-  font-size:18px;
-  letter-spacing:6px;
-  color:rgba(255,255,255,0.85);
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.2);
-  padding:15px 40px;
-  border-radius:4px;
-  cursor:pointer;
-  transition:all 0.3s ease;
-  text-transform:uppercase;
-  outline:none;
-}
-#enter-btn:hover{
-  background:rgba(255,40,40,0.15);
-  border-color:rgba(255,40,40,0.6);
-  box-shadow:0 0 30px rgba(255,40,40,0.3),inset 0 0 30px rgba(255,40,40,0.1);
-  letter-spacing:10px;
-}
+    /* ── СПЛЭШ ── */
+    #splash {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
+      z-index: 9999;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 30px;
+      transition: opacity 0.5s, visibility 0.5s;
+    }
+    #splash.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    #splash-title {
+      font-size: 48px;
+      letter-spacing: 12px;
+      color: rgba(255, 255, 255, 0.9);
+      text-shadow: 0 0 20px rgba(180, 0, 255, 0.5), 0 0 60px rgba(180, 0, 255, 0.3);
+    }
+    #enter-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 18px;
+      letter-spacing: 6px;
+      color: rgba(255, 255, 255, 0.85);
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      padding: 15px 40px;
+      border-radius: 4px;
+      transition: all 0.3s ease;
+      text-transform: uppercase;
+      outline: none;
+    }
+    #enter-btn:hover {
+      background: rgba(180, 0, 255, 0.15);
+      border-color: rgba(180, 0, 255, 0.6);
+      box-shadow: 0 0 30px rgba(180, 0, 255, 0.3), inset 0 0 30px rgba(180, 0, 255, 0.1);
+      letter-spacing: 10px;
+    }
+    #low-detail-wrap {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+    }
+    #low-detail-label {
+      font-size: 10px;
+      letter-spacing: 2px;
+      color: rgba(255, 255, 255, 0.5);
+      text-transform: uppercase;
+    }
+    #low-detail-btn {
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 12px;
+      letter-spacing: 3px;
+      color: rgba(255, 255, 255, 0.6);
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      padding: 8px 20px;
+      border-radius: 4px;
+      transition: 0.2s;
+      text-transform: uppercase;
+      outline: none;
+    }
+    #low-detail-btn:hover {
+      background: rgba(180, 0, 255, 0.1);
+      border-color: rgba(180, 0, 255, 0.4);
+      color: #d4a5ff;
+    }
+    #low-detail-btn.active {
+      background: rgba(180, 0, 255, 0.15);
+      border-color: rgba(180, 0, 255, 0.6);
+      color: #c27aff;
+      box-shadow: 0 0 10px rgba(180, 0, 255, 0.2);
+    }
 
-/* ── LOW DETAIL MODE TOGGLE ── */
-#low-detail-wrap{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:8px;
-}
-#low-detail-label{
-  font-family:'Share Tech Mono',monospace;
-  font-size:10px;
-  letter-spacing:2px;
-  color:rgba(255,255,255,0.5);
-  text-transform:uppercase;
-}
-#low-detail-btn{
-  font-family:'Share Tech Mono',monospace;
-  font-size:12px;
-  letter-spacing:3px;
-  color:rgba(255,255,255,0.6);
-  background:rgba(255,255,255,0.04);
-  border:1px solid rgba(255,255,255,0.15);
-  padding:8px 20px;
-  border-radius:4px;
-  cursor:pointer;
-  transition:0.2s;
-  text-transform:uppercase;
-  outline:none;
-}
-#low-detail-btn:hover{
-  background:rgba(255,200,50,0.1);
-  border-color:rgba(255,200,50,0.4);
-  color:rgba(255,200,50,0.9);
-}
-#low-detail-btn.active{
-  background:rgba(255,200,50,0.15);
-  border-color:rgba(255,200,50,0.6);
-  color:#ffc832;
-  box-shadow:0 0 10px rgba(255,200,50,0.2);
-}
+    /* ── ГЛАВНЫЙ ЭКРАН ── */
+    #hero {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+    }
+    #title {
+      position: absolute;
+      top: 12px;
+      width: 100%;
+      text-align: center;
+      font-size: 13px;
+      letter-spacing: 4px;
+      opacity: 0.6;
+      z-index: 10;
+      text-transform: uppercase;
+      pointer-events: none;
+    }
 
-/* ── ПЛЕЕР ── */
-#player{
-  position:absolute;
-  right:28px;
-  top:50%;
-  transform:translateY(-50%);
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:10px;
-  z-index:100;
-}
+    /* Кнопка "Подробнее" на главном экране */
+    #show-info-btn {
+      position: absolute;
+      bottom: 90px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 30;
+      background: rgba(180, 0, 255, 0.1);
+      border: 1px solid rgba(180, 0, 255, 0.3);
+      color: #d4a5ff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 14px;
+      letter-spacing: 3px;
+      padding: 10px 28px;
+      border-radius: 30px;
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.3s, box-shadow 0.3s, border-color 0.3s;
+      outline: none;
+    }
+    #show-info-btn:hover {
+      background: rgba(180, 0, 255, 0.25);
+      border-color: rgba(180, 0, 255, 0.6);
+      box-shadow: 0 0 20px rgba(180, 0, 255, 0.5);
+    }
+    #show-info-btn svg {
+      width: 16px;
+      height: 16px;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
 
-/* ── ПРОГРЕСС-БАР (УКРАШЕНИЕ) ── */
-#progress-wrap{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:4px;
-  width:100%;
-}
-#progress-track{
-  width:60px;
-  height:2px;
-  background:rgba(255,255,255,0.08);
-  border-radius:1px;
-  position:relative;
-  overflow:hidden;
-}
-#progress-fill{
-  position:absolute;
-  top:0;left:0;
-  height:100%;
-  width:0%;
-  background:rgba(255,255,255,0.5);
-  border-radius:1px;
-  transition:width 0.3s linear;
-}
-#progress-time{
-  font-size:7px;
-  letter-spacing:1px;
-  opacity:0.35;
-  text-align:center;
-  min-width:50px;
-}
+    /* ── ПЛЕЕР (fixed) ── */
+    #player-panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 70px;
+      z-index: 50;
+      background: rgba(10, 0, 20, 0.7);
+      backdrop-filter: blur(15px);
+      border-top: 1px solid rgba(180, 0, 255, 0.35);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      box-shadow: 0 -5px 25px rgba(0,0,0,0.7);
+      transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.5s ease;
+      will-change: transform, opacity;
+    }
+    #player-panel.hidden-player {
+      transform: translateY(100%);
+      opacity: 0;
+      pointer-events: none;
+    }
 
-#play-btn{
-  width:36px;height:36px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.06);
-  border:1px solid rgba(255,255,255,0.18);
-  color:#fff;
-  display:flex;align-items:center;justify-content:center;
-  transition:.2s;
-  backdrop-filter:blur(4px);
-  flex-shrink:0;
-  outline:none;
-}
-#play-btn:hover{
-  background:rgba(255,60,60,0.18);
-  border-color:rgba(255,60,60,0.5);
-  box-shadow:0 0 16px rgba(255,40,40,0.3);
-}
-#play-btn svg{
-  width:13px;height:13px;
-  display:block;
-  flex-shrink:0;
-  pointer-events:none;
-}
+    #player-panel::before {
+      content: "";
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(90deg, transparent 0%, rgba(180,0,255,0.08) 20%, rgba(120,0,255,0.08) 50%, rgba(180,0,255,0.08) 80%, transparent 100%);
+      pointer-events: none;
+      animation: glitchBar1 3s infinite;
+    }
+    @keyframes glitchBar1 {
+      0%,100%{transform:translateX(0);opacity:0.6}
+      10%{transform:translateX(-3px);opacity:0.8}
+      30%{transform:translateX(2px);opacity:0.4}
+      60%{transform:translateX(-1px);opacity:0.7}
+    }
 
-/* ── КНОПКИ ПЕРЕКЛЮЧЕНИЯ ТРЕКОВ ── */
-#track-nav{
-  display:flex;
-  gap:8px;
-  align-items:center;
-}
-.track-btn{
-  width:24px;height:24px;
-  border-radius:50%;
-  background:rgba(255,255,255,0.05);
-  border:1px solid rgba(255,255,255,0.12);
-  color:rgba(255,255,255,0.6);
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:12px;
-  transition:0.2s;
-  outline:none;
-  font-family:'Share Tech Mono',monospace;
-}
-.track-btn:hover{
-  background:rgba(255,255,255,0.15);
-  color:#fff;
-}
-.track-btn svg{
-  width:10px;height:10px;
-  pointer-events:none;
-}
+    .track-info { display:flex; align-items:center; gap:12px; min-width:140px; z-index:2; }
+    #mini-cover { width:40px; height:40px; border-radius:6px; object-fit:cover; border:1px solid rgba(255,255,255,0.15); box-shadow:0 0 15px rgba(180,0,255,0.3); flex-shrink:0; }
+    .track-meta { display:flex; flex-direction:column; gap:2px; overflow:hidden; }
+    #mini-name { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; color:#fff; text-shadow:0 0 8px rgba(180,0,255,0.6); }
+    #mini-artist { font-size:9px; letter-spacing:1px; opacity:0.6; text-transform:uppercase; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
 
-/* ── ШКАЛА ГРОМКОСТИ ── */
-#vol-wrap{
-  display:flex;flex-direction:column;align-items:center;gap:4px;
-}
-#vol-label{
-  font-size:8px;letter-spacing:3px;opacity:0.35;text-transform:uppercase;
-}
-#vol-track{
-  width:4px;height:100px;
-  background:rgba(255,255,255,0.07);
-  border-radius:4px;position:relative;
-  border:1px solid rgba(255,255,255,0.07);
-}
-#vol-fill{
-  position:absolute;bottom:0;left:0;right:0;border-radius:4px;
-  background:linear-gradient(to top,rgba(255,30,30,1),rgba(255,140,0,0.85),rgba(255,255,80,0.7),rgba(200,255,200,0.5));
-  box-shadow:0 0 10px rgba(255,60,60,0.6);
-  transition:height .06s;
-}
-#vol-thumb{
-  position:absolute;left:50%;transform:translate(-50%,50%);
-  width:14px;height:5px;background:#fff;border-radius:3px;
-  box-shadow:0 0 10px rgba(255,255,255,0.9),0 0 3px #f44;
-}
-#vol-pct{
-  font-size:9px;letter-spacing:1px;opacity:0.3;
-}
+    .track-controls { display:flex; flex-direction:column; align-items:center; gap:8px; flex:1; margin:0 30px; z-index:2; }
+    .seek-row { display:flex; align-items:center; width:100%; gap:10px; }
+    #seek-bar { -webkit-appearance:none; appearance:none; width:100%; height:3px; background:rgba(255,255,255,0.15); border-radius:2px; outline:none; cursor:none; transition:background 0.2s; }
+    #seek-bar::-webkit-slider-thumb { -webkit-appearance:none; width:12px; height:12px; border-radius:50%; background:#b026ff; box-shadow:0 0 12px #b026ff,0 0 6px #b026ff; border:none; transition:0.2s; }
+    #seek-bar:hover::-webkit-slider-thumb { width:14px; height:14px; }
+    .time-display { font-size:9px; letter-spacing:1px; opacity:0.5; white-space:nowrap; }
 
-.cursor{
-  position:fixed;
-  width:20px;height:20px;
-  border-radius:50%;
-  pointer-events:none;
-  background:radial-gradient(circle,rgba(255,60,60,0.65),rgba(200,200,200,0.15),transparent);
-  mix-blend-mode:difference;
-  z-index:10000;
-  opacity:1;
-}
+    .action-buttons { display:flex; align-items:center; gap:12px; z-index:2; }
+    .ctrl-btn { background:none; border:1px solid rgba(255,255,255,0.12); color:rgba(255,255,255,0.7); width:30px; height:30px; border-radius:50%; display:flex; align-items:center; justify-content:center; cursor:none; transition:all 0.25s; backdrop-filter:blur(5px); outline:none; }
+    .ctrl-btn svg { width:14px; height:14px; fill:currentColor; pointer-events:none; }
+    .ctrl-btn:hover { border-color:rgba(180,0,255,0.6); color:#fff; box-shadow:0 0 15px rgba(180,0,255,0.5); background:rgba(180,0,255,0.1); }
+    #play-btn-ctrl { width:34px; height:34px; background:rgba(255,255,255,0.05); border-color:rgba(180,0,255,0.4); box-shadow:0 0 20px rgba(180,0,255,0.3); }
+    #play-btn-ctrl svg { width:16px; height:16px; }
+    #play-btn-ctrl:hover { background:rgba(180,0,255,0.25); transform:scale(1.08); }
 
-/* ── ИНФО О ТРЕКЕ ── */
-#track-card{
-  display:flex;
-  flex-direction:column;
-  align-items:center;
-  gap:4px;
-}
-#track-cover{
-  width:42px;height:42px;
-  border-radius:4px;
-  object-fit:cover;
-  border:1px solid rgba(255,255,255,0.12);
-  filter:grayscale(20%);
-  box-shadow:0 0 12px rgba(0,0,0,0.6);
-  pointer-events:none;
-}
-#track-name{
-  font-size:7px;
-  letter-spacing:1.5px;
-  opacity:0.5;
-  text-align:center;
-  max-width:65px;
-  line-height:1.4;
-  text-transform:uppercase;
-  word-break:break-word;
-}
-#track-artist{
-  font-size:6px;
-  letter-spacing:1px;
-  opacity:0.3;
-  text-align:center;
-  text-transform:uppercase;
-}
+    .volume-section { display:flex; align-items:center; gap:6px; z-index:2; }
+    #volume-icon { opacity:0.5; font-size:14px; }
+    #volume-slider { -webkit-appearance:none; appearance:none; width:70px; height:3px; background:rgba(255,255,255,0.15); border-radius:2px; outline:none; cursor:none; }
+    #volume-slider::-webkit-slider-thumb { -webkit-appearance:none; width:10px; height:10px; border-radius:50%; background:#fff; box-shadow:0 0 8px rgba(255,255,255,0.8); }
+    #volume-pct { font-size:8px; opacity:0.4; width:28px; text-align:right; }
 
-@keyframes blink {
-  0%,100%{opacity:0.2;}
-  50%{opacity:0.8;}
-}
-</style>
+    /* ── ОВЕРЛЕЙ (информация по центру) ── */
+    #info-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(10px);
+      z-index: 100;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity 0.4s ease, visibility 0.4s ease;
+    }
+    #info-overlay.open {
+      opacity: 1;
+      visibility: visible;
+    }
+
+    #info-card-wrapper {
+      position: relative;
+      max-width: 500px;
+      width: 90%;
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(180, 0, 255, 0.3);
+      border-radius: 20px;
+      padding: 40px 30px;
+      box-shadow: 0 0 50px rgba(180, 0, 255, 0.3);
+      text-align: center;
+      transform: scale(0.9);
+      transition: transform 0.3s ease;
+    }
+    #info-overlay.open #info-card-wrapper {
+      transform: scale(1);
+    }
+
+    /* Кнопка закрыть */
+    .close-btn {
+      position: absolute;
+      top: 15px;
+      right: 20px;
+      background: none;
+      border: none;
+      color: #fff;
+      font-size: 24px;
+      cursor: none;
+      opacity: 0.6;
+      transition: opacity 0.2s;
+      outline: none;
+    }
+    .close-btn:hover {
+      opacity: 1;
+      color: #ff4080;
+    }
+
+    .info-card {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 25px;
+      background: transparent;
+    }
+
+    .avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 50%;
+      object-fit: cover;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+      box-shadow: 0 0 30px rgba(180, 0, 255, 0.5);
+    }
+
+    .username {
+      font-size: 36px;
+      letter-spacing: 8px;
+      text-transform: uppercase;
+      color: #fff;
+      text-shadow: 0 0 20px rgba(180, 0, 255, 0.8);
+    }
+
+    .bio-text {
+      font-size: 15px;
+      opacity: 0.8;
+      line-height: 1.6;
+      max-width: 380px;
+      color: rgba(255, 255, 255, 0.85);
+    }
+
+    .links-grid {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .links-grid a {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      font-size: 14px;
+      padding: 8px 20px;
+      border-radius: 30px;
+      background: rgba(255, 255, 255, 0.05);
+      backdrop-filter: blur(5px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      transition: all 0.3s ease;
+      letter-spacing: 1px;
+      cursor: none;
+    }
+    .links-grid a:hover {
+      background: rgba(180, 0, 255, 0.2);
+      border-color: rgba(180, 0, 255, 0.5);
+      box-shadow: 0 0 20px rgba(180, 0, 255, 0.4);
+      transform: scale(1.03);
+    }
+    .links-grid img {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      object-fit: cover;
+      pointer-events: none;
+    }
+
+    /* Кнопка раскрытия внутри */
+    .toggle-info-btn {
+      background: rgba(180, 0, 255, 0.1);
+      border: 1px solid rgba(180, 0, 255, 0.3);
+      color: #d4a5ff;
+      font-family: 'Share Tech Mono', monospace;
+      font-size: 13px;
+      letter-spacing: 2px;
+      padding: 8px 22px;
+      border-radius: 25px;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: none;
+      transition: background 0.3s, box-shadow 0.3s;
+      margin-top: 5px;
+      outline: none;
+    }
+    .toggle-info-btn .arrow-icon {
+      width: 14px;
+      height: 14px;
+      transition: transform 0.3s ease;
+      stroke: currentColor;
+      stroke-width: 2;
+      fill: none;
+    }
+    .toggle-info-btn.active .arrow-icon {
+      transform: rotate(180deg);
+    }
+    .toggle-info-btn:hover {
+      background: rgba(180, 0, 255, 0.25);
+      box-shadow: 0 0 15px rgba(180, 0, 255, 0.5);
+    }
+
+    .extra-info {
+      max-height: 0;
+      overflow: hidden;
+      transition: max-height 0.5s ease, opacity 0.3s ease;
+      opacity: 0;
+      text-align: left;
+      color: rgba(255,255,255,0.8);
+      font-size: 13px;
+      line-height: 1.5;
+      margin-top: 0;
+    }
+    .extra-info.open {
+      max-height: 400px;
+      opacity: 1;
+      margin-top: 15px;
+    }
+    .extra-info h3 {
+      font-size: 15px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #c27aff;
+      margin: 15px 0 5px;
+      text-shadow: 0 0 10px rgba(180,0,255,0.5);
+    }
+    .extra-info p {
+      margin-bottom: 8px;
+      opacity: 0.8;
+    }
+
+    /* Адаптив */
+    @media (max-width: 768px) {
+      .cursor-dot { display: none; }
+      body { cursor: auto; }
+      a, button, input[type="range"] { cursor: pointer; }
+
+      #player-panel {
+        height: 60px;
+        padding: 0 12px;
+      }
+      .track-info { gap: 8px; min-width: auto; }
+      #mini-cover { width: 32px; height: 32px; }
+      #mini-name { font-size: 9px; }
+      #mini-artist { font-size: 7px; }
+      .track-controls { margin: 0 10px; gap: 4px; }
+      .seek-row { gap: 5px; }
+      #seek-bar { height: 2px; }
+      .time-display { font-size: 7px; }
+      .action-buttons { gap: 8px; }
+      .ctrl-btn { width: 26px; height: 26px; }
+      .ctrl-btn svg { width: 12px; height: 12px; }
+      #play-btn-ctrl { width: 30px; height: 30px; }
+      #play-btn-ctrl svg { width: 14px; height: 14px; }
+      .volume-section { gap: 4px; }
+      #volume-icon { font-size: 12px; }
+      #volume-slider { width: 50px; }
+      #volume-pct { font-size: 7px; width: 24px; }
+
+      #info-card-wrapper { padding: 30px 20px; }
+      .username { font-size: 28px; letter-spacing: 5px; }
+      .avatar { width: 100px; height: 100px; }
+      .bio-text { font-size: 14px; }
+    }
+
+    @media (max-width: 480px) {
+      #player-panel {
+        flex-wrap: wrap;
+        height: auto;
+        padding: 8px 10px;
+        gap: 5px;
+      }
+      .track-info { order: 1; width: 100%; justify-content: center; }
+      .track-controls { order: 3; width: 100%; margin: 0; }
+      .action-buttons { order: 2; justify-content: center; width: 100%; }
+      .volume-section { order: 4; width: 100%; justify-content: center; margin-top: 5px; }
+      #volume-slider { width: 80px; }
+      #title { font-size: 11px; }
+      #splash-title { font-size: 32px; letter-spacing: 8px; }
+      #enter-btn { font-size: 16px; padding: 12px 30px; }
+      #show-info-btn { bottom: 70px; font-size: 12px; padding: 8px 20px; }
+    }
+  </style>
 </head>
 <body>
 
-<!-- SPLASH SCREEN -->
+<!-- ГЛИТЧ‑КАНВАС -->
+<canvas id="bg-canvas"></canvas>
+<div id="scanlines"></div>
+
+<!-- SPLASH -->
 <div id="splash">
   <div id="splash-title">WebSite</div>
   <button id="enter-btn">ENTER</button>
-  
   <div id="low-detail-wrap">
-    <div id="low-detail-label">LOW DETAIL MODE FOR POTATO PC (W.I.P)</div>
+    <div id="low-detail-label">LOW DETAIL MODE (W.I.P)</div>
     <button id="low-detail-btn">OFF</button>
   </div>
 </div>
 
-<!-- ОСНОВНОЙ КОНТЕНТ -->
-<div id="main-content">
-  <canvas id="bg"></canvas>
-  <div id="scanlines"></div>
-
+<!-- ГЛАВНЫЙ ЭКРАН -->
+<div id="hero">
   <div id="title">☢</div>
-
+  <button id="show-info-btn">
+    <span>Click</span>
+    <svg viewBox="0 0 24 24"><path d="M12 5v14M5 12l7 7 7-7"/></svg>
+  </button>
   <audio id="audio" loop preload="auto"></audio>
+</div>
 
-  <div id="player">
-    <div id="track-card">
-      <img id="track-cover" src="" alt="cover">
-      <div id="track-name"></div>
-      <div id="track-artist"></div>
-    </div>
-    
-    <div id="progress-wrap">
-      <div id="progress-track">
-        <div id="progress-fill"></div>
-      </div>
-      <div id="progress-time">0:00 / 0:00</div>
-    </div>
-    
-    <div id="track-nav">
-      <button class="track-btn" id="prev-btn">
-        <svg viewBox="0 0 10 10" fill="currentColor"><polygon points="8,1 3,5 8,9"/><rect x="1" y="1" width="1.5" height="8" rx="0.5"/></svg>
-      </button>
-      <div id="play-btn">
-        <svg id="icon-play" viewBox="0 0 14 14" fill="white" xmlns="http://www.w3.org/2000/svg">
-          <polygon points="2,1 13,7 2,13"/>
-        </svg>
-        <svg id="icon-pause" viewBox="0 0 14 14" fill="white" xmlns="http://www.w3.org/2000/svg" style="display:none">
-          <rect x="2" y="1" width="3.5" height="12" rx="1"/>
-          <rect x="8.5" y="1" width="3.5" height="12" rx="1"/>
-        </svg>
-      </div>
-      <button class="track-btn" id="next-btn">
-        <svg viewBox="0 0 10 10" fill="currentColor"><polygon points="2,1 7,5 2,9"/><rect x="8" y="1" width="1.5" height="8" rx="0.5"/></svg>
-      </button>
-    </div>
-    
-    <div id="vol-wrap">
-      <div id="vol-label">VOL</div>
-      <div id="vol-track">
-        <div id="vol-fill"></div>
-        <div id="vol-thumb"></div>
-      </div>
-      <div id="vol-pct">20%</div>
+<!-- ПЛЕЕР -->
+<div id="player-panel">
+  <div class="track-info">
+    <img id="mini-cover" src="" alt="cover">
+    <div class="track-meta">
+      <div id="mini-name"></div>
+      <div id="mini-artist"></div>
     </div>
   </div>
-
-  <div class="links-bar">
-    <a href="https://steamcommunity.com/id/DimFima/" target="_blank">
-      <img src="https://i.pinimg.com/1200x/9e/cd/89/9ecd89bcc35fe3666ca1c61e8b58814a.jpg" draggable="false">
-      <span>STEAM PROFILE</span>
-    </a>
+  <div class="track-controls">
+    <div class="seek-row">
+      <span class="time-display" id="current-time">0:00</span>
+      <input type="range" id="seek-bar" min="0" max="100" value="0" step="0.1">
+      <span class="time-display" id="total-time">0:00</span>
+    </div>
+  </div>
+  <div class="action-buttons">
+    <button class="ctrl-btn" id="prev-btn-ctrl">
+      <svg viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6l8.5 6V6z"/></svg>
+    </button>
+    <button class="ctrl-btn" id="play-btn-ctrl">
+      <svg id="icon-play-ctrl" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg>
+      <svg id="icon-pause-ctrl" viewBox="0 0 24 24" style="display:none"><path d="M6 19h4V5H6v14zm8-14v14h4V5h-4z"/></svg>
+    </button>
+    <button class="ctrl-btn" id="next-btn-ctrl">
+      <svg viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6v12zM16 6v12h2V6h-2z"/></svg>
+    </button>
+  </div>
+  <div class="volume-section">
+    <span id="volume-icon"></span>
+    <input type="range" id="volume-slider" min="0" max="100" value="20">
+    <span id="volume-pct">20%</span>
   </div>
 </div>
 
-<div class="cursor" id="cursor"></div>
+<!-- ОВЕРЛЕЙ С ИНФОРМАЦИЕЙ -->
+<div id="info-overlay">
+  <div id="info-card-wrapper">
+    <button class="close-btn" id="close-overlay-btn">&times;</button>
+    <div class="info-card">
+      <!-- ЗАМЕНИ ДАННЫЕ -->
+      <img class="avatar" src="https://i.pinimg.com/736x/19/45/85/194585779b8045885d6e35af0314d3a5.jpg" alt="avatar">
+      <div class="username">DimFima</div>
+      <p class="bio-text">
+        Гнию в своем кресле дома.
+      </p>
+      <div class="links-grid">
+        <a href="https://steamcommunity.com/id/DimFima/" target="_blank">
+          <img src="https://i.pinimg.com/1200x/9e/cd/89/9ecd89bcc35fe3666ca1c61e8b58814a.jpg" draggable="false">
+          <span>Steam Profile</span>
+        </a>
+        <a href="https://t.me/dimfimalox" target="_blank">
+          <img src="https://i.pinimg.com/originals/31/28/d2/3128d2171302832cb93f9c025c2fc1de.jpg?nii=t" draggable="false">
+          <span>Telegram</span>
+        </a>
+      </div>
+
+      <button class="toggle-info-btn" id="toggle-info-btn">
+        <span>click here</span>
+        <svg class="arrow-icon" viewBox="0 0 24 24"><path d="M6 9l6 6 6-6"/></svg>
+      </button>
+      <div class="extra-info" id="extra-info">
+        <h3>🎧 what I'm listening to</h3>
+        <p>
+          Sewerslvt, Sink Saiko, usedcvnt, Rory in early 20s, Nikita Kryukov (milk outside a bag of milk ost), genre breakcore and some atmospheric stuff like ambient.
+        </p>
+        <h3>🎮 What I'm playing</h3>
+        <p>
+          Garry`s mod, VR indie games (Gaming impotence spares no one). 
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Точка-курсор -->
+<div class="cursor-dot" id="cursor-dot"></div>
 
 <script>
-/* ══ ПЛЕЙЛИСТ ══ */
-const playlist = [
-  {
-    name: "sick, twisted, demented",
-    artist: "Sewerslvt",
-    src: "https://dl.dropboxusercontent.com/scl/fi/mgrvkw0ef4fdy77ixycqt/c6540ea2-0758-4482-becd-bd2207de862a_Sewerslvt-sick-twisted.mp3?rlkey=81209ndiu47vw7pk4lobiw7n7",
-    cover: "https://i.pinimg.com/1200x/77/c8/9b/77c89b21841e213f421d9eaf5db69472.jpg"
-  },
-  {
-    name: "whatever",
-    artist: "Sewerslvt",
-    src: "https://dl.dropboxusercontent.com/scl/fi/6vc03ntxy30a159cgcbvo/75feaf47-d897-424f-93a1-9a95560cd892_Sewerslvt-whatever.mp3?rlkey=4dz77bmtmgn9dhs5z2f7a92vk",
-    cover: "https://i.pinimg.com/736x/b3/7d/00/b37d00953467e55ab4ca5a3aacf0acb6.jpg"
-  },
-  {
-    name: "despair/hope",
-    artist: "CRXW, cast heal",
-    src: "https://dl.dropboxusercontent.com/scl/fi/aza90w2gac8qc16iea97h/186148f6-bda9-4778-bcdb-abb258adb4d4_despairhope-feat.-cast-he.mp3?rlkey=d117awi3isazdyx9n5ou399sy",
-    cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh0DdoEJch78Ji6EBwFGvkh1yVlK_MD16jCg&s"
-  },
-  {
-    name: "first love theory",
-    artist: "usedcvnt",
-    src: "https://dl.dropboxusercontent.com/scl/fi/7lxwqav4nlc5ginotii40/3e742d8f-9659-478f-a008-d0c83754c972_first-love-theory.mp3?rlkey=ouai55iraljow17217ab9g7bc",
-    cover: "https://yt3.googleusercontent.com/AJjWz3awUp96jjZ2H5KvxkYR9UAztAJxi6mjL_ym4D8EL7TbDUagUy29Pi3o6lca1EAjr-6nTs5JHBmr"
-  }
-];
+  (function() {
+    const playlist = [
+      { name: "sick, twisted, demented", artist: "Sewerslvt", src: "https://dl.dropboxusercontent.com/scl/fi/mgrvkw0ef4fdy77ixycqt/c6540ea2-0758-4482-becd-bd2207de862a_Sewerslvt-sick-twisted.mp3?rlkey=81209ndiu47vw7pk4lobiw7n7", cover: "https://i.pinimg.com/1200x/77/c8/9b/77c89b21841e213f421d9eaf5db69472.jpg" },
+      { name: "whatever", artist: "Sewerslvt", src: "https://dl.dropboxusercontent.com/scl/fi/6vc03ntxy30a159cgcbvo/75feaf47-d897-424f-93a1-9a95560cd892_Sewerslvt-whatever.mp3?rlkey=4dz77bmtmgn9dhs5z2f7a92vk", cover: "https://i.pinimg.com/736x/b3/7d/00/b37d00953467e55ab4ca5a3aacf0acb6.jpg" },
+      { name: "despair/hope", artist: "CRXW, cast heal", src: "https://dl.dropboxusercontent.com/scl/fi/aza90w2gac8qc16iea97h/186148f6-bda9-4778-bcdb-abb258adb4d4_despairhope-feat.-cast-he.mp3?rlkey=d117awi3isazdyx9n5ou399sy", cover: "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSh0DdoEJch78Ji6EBwFGvkh1yVlK_MD16jCg&s" },
+      { name: "first love theory", artist: "usedcvnt", src: "https://dl.dropboxusercontent.com/scl/fi/7lxwqav4nlc5ginotii40/3e742d8f-9659-478f-a008-d0c83754c972_first-love-theory.mp3?rlkey=ouai55iraljow17217ab9g7bc", cover: "https://yt3.googleusercontent.com/AJjWz3awUp96jjZ2H5KvxkYR9UAztAJxi6mjL_ym4D8EL7TbDUagUy29Pi3o6lca1EAjr-6nTs5JHBmr" }
+    ];
 
-let currentTrackIndex = Math.floor(Math.random() * playlist.length);
-let lowDetailMode = false;
+    let currentTrackIndex = Math.floor(Math.random() * playlist.length);
+    let lowDetailMode = false;
 
-document.addEventListener('contextmenu', e => e.preventDefault());
+    const splash = document.getElementById("splash");
+    const lowDetailBtn = document.getElementById("low-detail-btn");
+    const canvas = document.getElementById("bg-canvas");
+    const ctx = canvas.getContext("2d");
+    const audio = document.getElementById("audio");
+    const cursorDot = document.getElementById("cursor-dot");
+    const playerPanel = document.getElementById("player-panel");
+    const infoOverlay = document.getElementById("info-overlay");
+    const showInfoBtn = document.getElementById("show-info-btn");
+    const closeOverlayBtn = document.getElementById("close-overlay-btn");
 
-/* ══ LOW DETAIL MODE ══ */
-const lowDetailBtn = document.getElementById("low-detail-btn");
+    const miniCover = document.getElementById("mini-cover");
+    const miniName = document.getElementById("mini-name");
+    const miniArtist = document.getElementById("mini-artist");
+    const seekBar = document.getElementById("seek-bar");
+    const currentTimeSpan = document.getElementById("current-time");
+    const totalTimeSpan = document.getElementById("total-time");
+    const playBtnCtrl = document.getElementById("play-btn-ctrl");
+    const iconPlayCtrl = document.getElementById("icon-play-ctrl");
+    const iconPauseCtrl = document.getElementById("icon-pause-ctrl");
+    const prevBtnCtrl = document.getElementById("prev-btn-ctrl");
+    const nextBtnCtrl = document.getElementById("next-btn-ctrl");
+    const volumeSlider = document.getElementById("volume-slider");
+    const volumePct = document.getElementById("volume-pct");
+    const volumeIcon = document.getElementById("volume-icon");
 
-function updateLowDetailUI(){
-  if(lowDetailMode){
-    lowDetailBtn.textContent = "ON";
-    lowDetailBtn.classList.add("active");
-  } else {
-    lowDetailBtn.textContent = "OFF";
-    lowDetailBtn.classList.remove("active");
-  }
-}
+    let playing = false, fadeInterval = null;
+    const FADE_DURATION = 800, FADE_STEPS = 40;
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
 
-lowDetailBtn.addEventListener("click", () => {
-  lowDetailMode = !lowDetailMode;
-  updateLowDetailUI();
-  spawnParticles();
-  updateText(textList[tIdx]);
-});
-updateLowDetailUI();
+    // курсор
+    let mx = 0, my = 0, cx = 0, cy = 0;
+    document.addEventListener("mousemove", e => { mx = e.clientX; my = e.clientY; });
+    (function animDot() {
+      cx += (mx - cx) * 0.6;
+      cy += (my - cy) * 0.6;
+      cursorDot.style.left = cx + "px";
+      cursorDot.style.top = cy + "px";
+      requestAnimationFrame(animDot);
+    })();
 
-/* ══ SPLASH + АВТОЗАПУСК ══ */
-const splash = document.getElementById("splash");
-const enterBtn = document.getElementById("enter-btn");
-const mainContent = document.getElementById("main-content");
-const audio = document.getElementById("audio");
-const iconPlay = document.getElementById("icon-play");
-const iconPause = document.getElementById("icon-pause");
-const cursor = document.getElementById("cursor");
+    const hoverTargets = document.querySelectorAll('a, button, input[type="range"], .ctrl-btn, #enter-btn, #show-info-btn, .close-btn');
+    hoverTargets.forEach(el => {
+      el.addEventListener("mouseenter", () => document.body.classList.add("cursor-hover"));
+      el.addEventListener("mouseleave", () => document.body.classList.remove("cursor-hover"));
+    });
 
-let playing = false;
-let fadeInterval = null;
-const FADE_DURATION = 800;
-const FADE_STEPS = 40;
+    // Открыть/закрыть оверлей
+    showInfoBtn.addEventListener("click", () => {
+      infoOverlay.classList.add("open");
+      playerPanel.classList.add("hidden-player");
+    });
 
-function sliderToReal(v) { return Math.pow(v, 2.5); }
+    closeOverlayBtn.addEventListener("click", () => {
+      infoOverlay.classList.remove("open");
+      playerPanel.classList.remove("hidden-player");
+    });
 
-function stopFade() {
-  if (fadeInterval) {
-    clearInterval(fadeInterval);
-    fadeInterval = null;
-  }
-}
+    // Закрытие по клику на фон
+    infoOverlay.addEventListener("click", (e) => {
+      if (e.target === infoOverlay) {
+        infoOverlay.classList.remove("open");
+        playerPanel.classList.remove("hidden-player");
+      }
+    });
 
-function fadeIn(targetVolume) {
-  stopFade();
-  let currentVol = audio.volume;
-  let targetVol = sliderToReal(targetVolume);
-  let step = (targetVol - currentVol) / FADE_STEPS;
-  let stepTime = FADE_DURATION / FADE_STEPS;
-  let steps = 0;
-
-  fadeInterval = setInterval(() => {
-    steps++;
-    audio.volume = Math.min(currentVol + step * steps, targetVol);
-    if (steps >= FADE_STEPS) {
-      audio.volume = targetVol;
-      stopFade();
+    function updateLowDetailUI() {
+      lowDetailBtn.textContent = lowDetailMode ? "ON" : "OFF";
+      lowDetailBtn.classList.toggle("active", lowDetailMode);
     }
-  }, stepTime);
-}
+    lowDetailBtn.addEventListener("click", () => {
+      lowDetailMode = !lowDetailMode;
+      updateLowDetailUI();
+      spawnParticles();
+      updateText(textList[tIdx]);
+    });
+    updateLowDetailUI();
 
-function fadeOut(callback) {
-  stopFade();
-  let currentVol = audio.volume;
-  let step = currentVol / FADE_STEPS;
-  let stepTime = FADE_DURATION / FADE_STEPS;
-  let steps = 0;
+    function sliderToReal(v) { return Math.pow(v, 2.5); }
+    function stopFade() { if (fadeInterval) { clearInterval(fadeInterval); fadeInterval = null; } }
+    function fadeIn(targetVolume) {
+      stopFade();
+      let currentVol = audio.volume, targetVol = sliderToReal(targetVolume);
+      let step = (targetVol - currentVol) / FADE_STEPS, stepTime = FADE_DURATION / FADE_STEPS, steps = 0;
+      fadeInterval = setInterval(() => {
+        steps++;
+        audio.volume = Math.min(currentVol + step * steps, targetVol);
+        if (steps >= FADE_STEPS) { audio.volume = targetVol; stopFade(); }
+      }, stepTime);
+    }
+    function fadeOut(callback) {
+      stopFade();
+      let currentVol = audio.volume, step = currentVol / FADE_STEPS, stepTime = FADE_DURATION / FADE_STEPS, steps = 0;
+      fadeInterval = setInterval(() => {
+        steps++;
+        audio.volume = Math.max(currentVol - step * steps, 0);
+        if (steps >= FADE_STEPS) { audio.volume = 0; stopFade(); if (callback) callback(); }
+      }, stepTime);
+    }
 
-  fadeInterval = setInterval(() => {
-    steps++;
-    audio.volume = Math.max(currentVol - step * steps, 0);
-    if (steps >= FADE_STEPS) {
+    function loadTrack(index) {
+      currentTrackIndex = index;
+      const t = playlist[index];
+      audio.src = t.src;
+      miniCover.src = t.cover;
+      miniName.textContent = t.name;
+      miniArtist.textContent = t.artist;
+      audio.addEventListener("loadedmetadata", updateTotalTime, { once: true });
+      updateTotalTime();
+    }
+    function updateTotalTime() {
+      if (audio.duration) {
+        totalTimeSpan.textContent = formatTime(audio.duration);
+        seekBar.max = audio.duration;
+      } else {
+        totalTimeSpan.textContent = "0:00";
+      }
+    }
+    function nextTrack() { stopFade(); loadTrack((currentTrackIndex+1)%playlist.length); if(playing){ audio.play().then(()=>fadeIn(volume)).catch(()=>{}); } }
+    function prevTrack() { stopFade(); loadTrack((currentTrackIndex-1+playlist.length)%playlist.length); if(playing){ audio.play().then(()=>fadeIn(volume)).catch(()=>{}); } }
+    loadTrack(currentTrackIndex);
+
+    document.getElementById("enter-btn").addEventListener("click", () => {
+      splash.classList.add("hidden");
+      volume = 0.20;
+      volumeSlider.value = volume * 100;
+      volumePct.textContent = Math.round(volume*100)+"%";
       audio.volume = 0;
-      stopFade();
-      if (callback) callback();
-    }
-  }, stepTime);
-}
-
-/* ══ ЗАГРУЗКА ТРЕКА ══ */
-function loadTrack(index) {
-  currentTrackIndex = index;
-  const track = playlist[index];
-  audio.src = track.src;
-  document.getElementById("track-cover").src = track.cover;
-  document.getElementById("track-name").textContent = track.name;
-  document.getElementById("track-artist").textContent = track.artist;
-  document.getElementById("progress-fill").style.width = "0%";
-  document.getElementById("progress-time").textContent = "0:00 / 0:00";
-}
-
-function nextTrack() {
-  stopFade();
-  let newIndex = (currentTrackIndex + 1) % playlist.length;
-  loadTrack(newIndex);
-  if (playing) {
-    audio.play().then(() => {
-      fadeIn(volume);
-    }).catch(() => {});
-  }
-}
-
-function prevTrack() {
-  stopFade();
-  let newIndex = (currentTrackIndex - 1 + playlist.length) % playlist.length;
-  loadTrack(newIndex);
-  if (playing) {
-    audio.play().then(() => {
-      fadeIn(volume);
-    }).catch(() => {});
-  }
-}
-
-loadTrack(currentTrackIndex);
-
-enterBtn.addEventListener("click", () => {
-  mainContent.style.display = "block";
-  splash.classList.add("hidden");
-
-  setTimeout(() => {
-    setVolumeUI(volume);
-  }, 50);
-
-  audio.volume = 0;
-  audio.play().then(() => {
-    playing = true;
-    iconPlay.style.display = "none";
-    iconPause.style.display = "block";
-    fadeIn(volume);
-  }).catch(e => console.log("Audio play failed:", e));
-});
-
-/* ══ CANVAS ══ */
-const canvas = document.getElementById("bg");
-const ctx = canvas.getContext("2d");
-canvas.width = innerWidth;
-canvas.height = innerHeight;
-
-/* ══ ЧАСТИЦЫ ══ */
-let particles = [];
-function spawnParticles() {
-  particles = [];
-  let count = lowDetailMode ? 60 : 150;
-  for (let i = 0; i < count; i++)
-    particles.push({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      vx: (Math.random() - .5) * 1.4,
-      vy: (Math.random() - .5) * 1.4,
-      size: Math.random() < 0.12 ? 3 : 1,
-      bright: Math.random()
+      audio.play().then(() => {
+        playing = true;
+        iconPlayCtrl.style.display = "none";
+        iconPauseCtrl.style.display = "block";
+        fadeIn(volume);
+      }).catch(e => console.log("Audio play failed:", e));
     });
-}
-spawnParticles();
 
-/* ══ ТЕКСТОВЫЕ ЧАСТИЦЫ ══ */
-const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+=?/\\|[]{}()<>!~^";
-const textList = ["DIMFIMA", "BREAKCORE", "SEWERSLVT", "NUH UH", "HELLO?"];
-let tIdx = 0;
-let textParts = [];
-
-const glitchPalette = [
-  "rgba(255,30,80,1)",
-  "rgba(0,255,180,1)",
-  "rgba(255,220,0,1)",
-  "rgba(180,0,255,1)",
-  "rgba(0,180,255,1)",
-  "rgba(255,255,255,1)"
-];
-
-function getTextPositions(text) {
-  let off = document.createElement("canvas");
-  off.width = 800;
-  off.height = 200;
-  let oc = off.getContext("2d");
-  oc.fillStyle = "#fff";
-  oc.font = "bold 140px monospace";
-  oc.textAlign = "center";
-  oc.fillText(text, 400, 140);
-  let data = oc.getImageData(0, 0, 800, 200).data;
-  let pos = [];
-  let d = lowDetailMode ? 8 : 5;
-  for (let y = 0; y < 200; y += d)
-    for (let x = 0; x < 800; x += d) {
-      let i = (y * 800 + x) * 4;
-      if (data[i] > 128) pos.push({ tx: x + canvas.width / 2 - 400, ty: y + canvas.height / 2 - 100 });
+    // Canvas глитч-частицы
+    let particles = [];
+    function spawnParticles() {
+      particles = [];
+      let count = lowDetailMode ? 40 : 110;
+      for (let i = 0; i < count; i++) particles.push({
+        x: Math.random()*canvas.width, y: Math.random()*canvas.height,
+        vx: (Math.random()-.5)*1.4, vy: (Math.random()-.5)*1.4,
+        size: Math.random()<0.12?3:1, bright: Math.random()
+      });
     }
-  return pos;
-}
+    spawnParticles();
 
-function updateText(text) {
-  let pos = getTextPositions(text);
-  if (!textParts.length) {
-    textParts = pos.map(p => ({
-      x: Math.random() * canvas.width,
-      y: Math.random() * canvas.height,
-      tx: p.tx,
-      ty: p.ty,
-      ch: chars[Math.floor(Math.random() * chars.length)],
-      col: "rgba(255,255,255,0.92)",
-      glitchCol: null,
-      glitchColTimer: 0,
-      shiftX: 0,
-      shiftY: 0,
-      shiftTimer: 0
-    }));
-  } else {
-    let n = Math.min(textParts.length, pos.length);
-    for (let i = 0; i < n; i++) { textParts[i].tx = pos[i].tx; textParts[i].ty = pos[i].ty; }
-    if (pos.length > textParts.length)
-      for (let i = textParts.length; i < pos.length; i++)
-        textParts.push({
-          x: Math.random() * canvas.width,
-          y: Math.random() * canvas.height,
-          tx: pos[i].tx,
-          ty: pos[i].ty,
-          ch: chars[Math.floor(Math.random() * chars.length)],
-          col: "rgba(255,255,255,0.92)",
-          glitchCol: null,
-          glitchColTimer: 0,
-          shiftX: 0,
-          shiftY: 0,
-          shiftTimer: 0
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789@#$%&*+=?/\\|[]{}()<>!~^";
+    const textList = ["DIMFIMA", "BREAKCORE", "SEWERSLVT", "NUH UH", "HELLO?"];
+    let tIdx = 0, textParts = [];
+    const glitchPalette = ["rgba(180,0,255,1)","rgba(0,255,180,1)","rgba(255,220,0,1)","rgba(255,0,100,1)","rgba(0,180,255,1)","rgba(255,255,255,1)"];
+
+    function getTextPositions(text) {
+      let off = document.createElement("canvas"); off.width = 800; off.height = 200;
+      let oc = off.getContext("2d");
+      oc.fillStyle = "#fff"; oc.font = "bold 140px monospace"; oc.textAlign = "center";
+      oc.fillText(text, 400, 140);
+      let data = oc.getImageData(0,0,800,200).data, pos = [];
+      let d = lowDetailMode ? 8 : 5;
+      for (let y=0; y<200; y+=d) for (let x=0; x<800; x+=d) {
+        if (data[(y*800+x)*4] > 128) pos.push({ tx: x + canvas.width/2 - 400, ty: y + canvas.height/2 - 100 });
+      }
+      return pos;
+    }
+    function updateText(text) {
+      let pos = getTextPositions(text);
+      if (!textParts.length) {
+        textParts = pos.map(p => ({
+          x: Math.random()*canvas.width, y: Math.random()*canvas.height, tx: p.tx, ty: p.ty,
+          ch: chars[Math.floor(Math.random()*chars.length)], col: "rgba(255,255,255,0.92)",
+          glitchCol: null, glitchColTimer: 0, shiftX: 0, shiftY: 0, shiftTimer: 0
+        }));
+      } else {
+        let n = Math.min(textParts.length, pos.length);
+        for (let i=0; i<n; i++) { textParts[i].tx=pos[i].tx; textParts[i].ty=pos[i].ty; }
+        if (pos.length > textParts.length) for (let i=textParts.length; i<pos.length; i++) textParts.push({
+          x:Math.random()*canvas.width,y:Math.random()*canvas.height,tx:pos[i].tx,ty:pos[i].ty,
+          ch:chars[Math.floor(Math.random()*chars.length)],col:"rgba(255,255,255,0.92)",
+          glitchCol:null,glitchColTimer:0,shiftX:0,shiftY:0,shiftTimer:0
         });
-    else textParts = textParts.slice(0, pos.length);
-  }
-}
-updateText(textList[0]);
-let textInterval = setInterval(() => { tIdx = (tIdx + 1) % textList.length; updateText(textList[tIdx]); }, 5000);
-
-/* ══ ГЛИТЧ СОСТОЯНИЕ ══ */
-let glitchActive = false;
-let glitchTimer = 0;
-let glitchLines = [];
-let noiseLevel = 0;
-let rgbAmount = 0;
-let blockShiftX = 0, blockShiftY = 0, blockShiftTimer = 0;
-let blockShiftActive = false;
-
-function triggerGlitch() {
-  if (lowDetailMode && Math.random() < 0.5) return;
-  
-  glitchActive = true;
-  glitchTimer = 10 + Math.floor(Math.random() * 22);
-  noiseLevel = 0.06 + Math.random() * 0.14;
-  rgbAmount = lowDetailMode ? 0 : (4 + Math.random() * 16);
-
-  glitchLines = [];
-  let n = lowDetailMode ? 2 : (4 + Math.floor(Math.random() * 12));
-  for (let i = 0; i < n; i++)
-    glitchLines.push({
-      y: Math.random() * canvas.height,
-      h: Math.random() < 0.6 ? (1 + Math.random() * 8) : (12 + Math.random() * 50),
-      dx: (Math.random() - .5) * 120,
-      tinted: Math.random() < 0.35
-    });
-
-  if (!lowDetailMode) {
-    textParts.forEach(p => {
-      if (Math.random() < 0.55) {
-        p.glitchCol = glitchPalette[Math.floor(Math.random() * glitchPalette.length)];
-        p.glitchColTimer = glitchTimer + Math.floor(Math.random() * 10);
+        else textParts = textParts.slice(0, pos.length);
       }
-      if (Math.random() < 0.12) {
-        p.shiftX = (Math.random() - .5) * 30;
-        p.shiftY = (Math.random() - .5) * 10;
-        p.shiftTimer = 3 + Math.floor(Math.random() * 8);
-      }
-    });
-  }
-
-  if (Math.random() < 0.5) {
-    blockShiftActive = true;
-    blockShiftX = (Math.random() - .5) * 60;
-    blockShiftY = (Math.random() - .5) * 20;
-    blockShiftTimer = 4 + Math.floor(Math.random() * 10);
-  }
-}
-
-function scheduleGlitch() {
-  let delay = lowDetailMode ? (1500 + Math.random() * 3000) : (500 + Math.random() * 2200);
-  setTimeout(() => { triggerGlitch(); scheduleGlitch(); }, delay);
-}
-scheduleGlitch();
-
-/* ══ ГЛАВНЫЙ ЦИКЛ ══ */
-function draw() {
-  ctx.fillStyle = "rgba(5,5,5,0.2)";
-  ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-  particles.forEach(p => {
-    p.x += p.vx;
-    p.y += p.vy;
-    if (p.x < 0 || p.x > canvas.width) p.vx *= -1;
-    if (p.y < 0 || p.y > canvas.height) p.vy *= -1;
-    ctx.fillStyle = (glitchActive && Math.random() < 0.07)
-      ? (Math.random() < 0.5 ? "rgba(255,30,80,0.9)" : "rgba(30,255,180,0.9)")
-      : `rgba(255,255,255,${0.4 + p.bright * 0.5})`;
-    ctx.fillRect(p.x, p.y, p.size, p.size);
-  });
-
-  if (glitchActive) {
-    let cnt = Math.floor(canvas.width * canvas.height * noiseLevel * 0.0012);
-    for (let i = 0; i < cnt; i++) {
-      let nx = Math.random() * canvas.width, ny = Math.random() * canvas.height;
-      let r = Math.random();
-      ctx.fillStyle = r < 0.5 ? `rgba(255,255,255,${Math.random() * 0.8})`
-        : r < 0.75 ? `rgba(255,0,80,${Math.random() * 0.65})` : `rgba(0,255,190,${Math.random() * 0.65})`;
-      ctx.fillRect(nx, ny, Math.random() < 0.2 ? Math.random() * 5 : 1, Math.random() < 0.08 ? Math.random() * 10 : 1);
     }
+    updateText(textList[0]);
+    let textInterval = setInterval(() => { tIdx=(tIdx+1)%textList.length; updateText(textList[tIdx]); }, 5000);
 
-    glitchLines.forEach(l => {
-      let sy = Math.max(0, Math.floor(l.y)), sh = Math.min(Math.ceil(l.h), canvas.height - sy);
-      if (sh < 1) return;
-      try {
-        let imgD = ctx.getImageData(0, sy, canvas.width, sh);
-        ctx.putImageData(imgD, l.dx, sy);
-        if (l.tinted) {
-          ctx.fillStyle = Math.random() < 0.5 ? "rgba(255,0,80,0.1)" : "rgba(0,255,180,0.08)";
-          ctx.fillRect(0, sy, canvas.width, sh);
-        }
-      } catch (e) {}
-    });
+    let glitchActive=false, glitchTimer=0, glitchLines=[], noiseLevel=0, rgbAmount=0;
+    let blockShiftX=0, blockShiftY=0, blockShiftTimer=0, blockShiftActive=false;
 
-    if (Math.random() < 0.45) {
-      let lx = Math.random() * canvas.width;
-      ctx.fillStyle = Math.random() < 0.5 ? "rgba(255,0,80,0.45)" : "rgba(0,255,180,0.4)";
-      ctx.fillRect(lx, 0, Math.random() < 0.7 ? 1 : Math.random() * 3, canvas.height);
+    function triggerGlitch() {
+      if (lowDetailMode && Math.random()<0.5) return;
+      glitchActive=true; glitchTimer=10+Math.floor(Math.random()*22);
+      noiseLevel=0.04+Math.random()*0.1; rgbAmount=lowDetailMode?0:(3+Math.random()*10);
+      glitchLines=[]; let n=lowDetailMode?2:(3+Math.floor(Math.random()*8));
+      for(let i=0;i<n;i++) glitchLines.push({y:Math.random()*canvas.height, h:Math.random()<0.6?(1+Math.random()*6):(10+Math.random()*30), dx:(Math.random()-.5)*90, tinted:Math.random()<0.3});
+      if(!lowDetailMode){textParts.forEach(p=>{if(Math.random()<0.5){p.glitchCol=glitchPalette[Math.floor(Math.random()*glitchPalette.length)];p.glitchColTimer=glitchTimer+Math.floor(Math.random()*8);} if(Math.random()<0.1){p.shiftX=(Math.random()-.5)*20;p.shiftY=(Math.random()-.5)*8;p.shiftTimer=3+Math.floor(Math.random()*6);}});}
+      if(Math.random()<0.4){blockShiftActive=true;blockShiftX=(Math.random()-.5)*40;blockShiftY=(Math.random()-.5)*15;blockShiftTimer=4+Math.floor(Math.random()*8);}
     }
+    function scheduleGlitch(){let d=lowDetailMode?(2000+Math.random()*3500):(800+Math.random()*2500);setTimeout(()=>{triggerGlitch();scheduleGlitch();},d);}
+    scheduleGlitch();
 
-    if (rgbAmount > 0) {
-      try {
-        let iw = canvas.width, ih = canvas.height;
-        let src = ctx.getImageData(0, 0, iw, ih);
-        let dst = ctx.createImageData(iw, ih);
-        let sd = src.data, dd = dst.data;
-        let shift = Math.round(rgbAmount);
-        for (let y = 0; y < ih; y++) {
-          for (let x = 0; x < iw; x++) {
-            let di = (y * iw + x) * 4;
-            let rx = Math.min(iw - 1, x + shift);
-            let ri = (y * iw + rx) * 4;
-            dd[di] = sd[ri];
-            dd[di + 1] = sd[(y * iw + x) * 4 + 1];
-            let bx = Math.max(0, x - shift);
-            let bi = (y * iw + bx) * 4;
-            dd[di + 2] = sd[bi + 2];
-            dd[di + 3] = sd[(y * iw + x) * 4 + 3];
-          }
-        }
-        ctx.putImageData(dst, 0, 0);
-      } catch (e) {}
+    function draw() {
+      ctx.fillStyle="rgba(5,5,5,0.2)"; ctx.fillRect(0,0,canvas.width,canvas.height);
+      particles.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>canvas.width)p.vx*=-1;if(p.y<0||p.y>canvas.height)p.vy*=-1;ctx.fillStyle=(glitchActive&&Math.random()<0.07)?(Math.random()<0.5?"rgba(180,0,255,0.9)":"rgba(0,255,180,0.9)"):`rgba(255,255,255,${0.4+p.bright*0.5})`;ctx.fillRect(p.x,p.y,p.size,p.size);});
+      if(glitchActive){let cnt=Math.floor(canvas.width*canvas.height*noiseLevel*0.001);for(let i=0;i<cnt;i++){let nx=Math.random()*canvas.width,ny=Math.random()*canvas.height;ctx.fillStyle=Math.random()<0.5?`rgba(255,255,255,${Math.random()*0.7})`:Math.random()<0.75?`rgba(255,0,100,${Math.random()*0.6})`:`rgba(0,255,190,${Math.random()*0.6})`;ctx.fillRect(nx,ny,Math.random()<0.2?Math.random()*4:1,Math.random()<0.08?Math.random()*8:1);} glitchLines.forEach(l=>{let sy=Math.max(0,Math.floor(l.y)),sh=Math.min(Math.ceil(l.h),canvas.height-sy);if(sh<1)return;try{let imgD=ctx.getImageData(0,sy,canvas.width,sh);ctx.putImageData(imgD,l.dx,sy);if(l.tinted){ctx.fillStyle=Math.random()<0.5?"rgba(180,0,255,0.08)":"rgba(0,255,180,0.06)";ctx.fillRect(0,sy,canvas.width,sh);}}catch(e){}});if(Math.random()<0.4){let lx=Math.random()*canvas.width;ctx.fillStyle=Math.random()<0.5?"rgba(180,0,255,0.4)":"rgba(0,255,180,0.35)";ctx.fillRect(lx,0,Math.random()<0.7?1:Math.random()*2,canvas.height);} if(rgbAmount>0){try{let iw=canvas.width,ih=canvas.height;let src=ctx.getImageData(0,0,iw,ih),dst=ctx.createImageData(iw,ih),sd=src.data,dd=dst.data;let shift=Math.round(rgbAmount);for(let y=0;y<ih;y++){for(let x=0;x<iw;x++){let di=(y*iw+x)*4;let rx=Math.min(iw-1,x+shift),ri=(y*iw+rx)*4;dd[di]=sd[ri];dd[di+1]=sd[(y*iw+x)*4+1];let bx=Math.max(0,x-shift),bi=(y*iw+bx)*4;dd[di+2]=sd[bi+2];dd[di+3]=sd[(y*iw+x)*4+3];}}ctx.putImageData(dst,0,0);}catch(e){}} glitchTimer--;if(glitchTimer<=0){glitchActive=false;rgbAmount=0;noiseLevel=0;glitchLines=[];}} if(blockShiftActive){blockShiftTimer--;if(blockShiftTimer<=0){blockShiftActive=false;blockShiftX=0;blockShiftY=0;}} ctx.font="11px 'Share Tech Mono',monospace"; textParts.forEach(p=>{p.x+=(p.tx-p.x)*0.12;p.y+=(p.ty-p.y)*0.12;if(Math.random()<0.14)p.ch=chars[Math.floor(Math.random()*chars.length)];if(p.glitchColTimer>0){p.glitchColTimer--;if(Math.random()<0.2)p.glitchCol=glitchPalette[Math.floor(Math.random()*glitchPalette.length)];if(p.glitchColTimer<=0)p.glitchCol=null;} if(p.shiftTimer>0){p.shiftTimer--;if(p.shiftTimer<=0){p.shiftX=0;p.shiftY=0;}} let dx=p.x+p.shiftX+(blockShiftActive?blockShiftX:0),dy=p.y+p.shiftY+(blockShiftActive?blockShiftY:0);ctx.fillStyle=p.glitchCol?p.glitchCol:"rgba(255,255,255,0.92)";ctx.fillText(p.ch,dx,dy);if(!lowDetailMode&&p.glitchCol&&Math.random()<0.3){ctx.globalAlpha=0.3;ctx.fillStyle=glitchPalette[Math.floor(Math.random()*glitchPalette.length)];ctx.fillText(p.ch,dx+(Math.random()-.5)*6,dy+(Math.random()-.5)*4);ctx.globalAlpha=1;}}); requestAnimationFrame(draw);
     }
+    draw();
 
-    glitchTimer--;
-    if (glitchTimer <= 0) {
-      glitchActive = false;
-      rgbAmount = 0;
-      noiseLevel = 0;
-      glitchLines = [];
-    }
-  }
-
-  if (blockShiftActive) {
-    blockShiftTimer--;
-    if (blockShiftTimer <= 0) {
-      blockShiftActive = false;
-      blockShiftX = 0;
-      blockShiftY = 0;
-    }
-  }
-
-  ctx.font = "11px 'Share Tech Mono',monospace";
-  textParts.forEach(p => {
-    p.x += (p.tx - p.x) * 0.12;
-    p.y += (p.ty - p.y) * 0.12;
-    if (Math.random() < 0.14) p.ch = chars[Math.floor(Math.random() * chars.length)];
-
-    if (p.glitchColTimer > 0) {
-      p.glitchColTimer--;
-      if (Math.random() < 0.2)
-        p.glitchCol = glitchPalette[Math.floor(Math.random() * glitchPalette.length)];
-      if (p.glitchColTimer <= 0) p.glitchCol = null;
-    }
-
-    if (p.shiftTimer > 0) {
-      p.shiftTimer--;
-      if (p.shiftTimer <= 0) { p.shiftX = 0; p.shiftY = 0; }
-    }
-
-    let drawX = p.x + p.shiftX + (blockShiftActive ? blockShiftX : 0);
-    let drawY = p.y + p.shiftY + (blockShiftActive ? blockShiftY : 0);
-
-    ctx.fillStyle = p.glitchCol ? p.glitchCol : "rgba(255,255,255,0.92)";
-    ctx.fillText(p.ch, drawX, drawY);
-
-    if (!lowDetailMode && p.glitchCol && Math.random() < 0.3) {
-      ctx.globalAlpha = 0.3;
-      ctx.fillStyle = glitchPalette[Math.floor(Math.random() * glitchPalette.length)];
-      ctx.fillText(p.ch, drawX + (Math.random() - .5) * 6, drawY + (Math.random() - .5) * 4);
-      ctx.globalAlpha = 1;
-    }
-  });
-
-  requestAnimationFrame(draw);
-}
-draw();
-
-/* ══ АУДИО ══ */
-const playBtn = document.getElementById("play-btn");
-const volTrack = document.getElementById("vol-track");
-const volFill = document.getElementById("vol-fill");
-const volThumb = document.getElementById("vol-thumb");
-const volPct = document.getElementById("vol-pct");
-const progressFill = document.getElementById("progress-fill");
-const progressTime = document.getElementById("progress-time");
-
-let volume = 0.20, dragging = false;
-audio.volume = 0;
-
-function formatTime(seconds) {
-  let mins = Math.floor(seconds / 60);
-  let secs = Math.floor(seconds % 60);
-  return `${mins}:${secs.toString().padStart(2, '0')}`;
-}
-
-function updateProgress() {
-  if (audio.duration) {
-    let pct = (audio.currentTime / audio.duration) * 100;
-    progressFill.style.width = pct + "%";
-    progressTime.textContent = `${formatTime(audio.currentTime)} / ${formatTime(audio.duration)}`;
-  }
-}
-
-audio.addEventListener("timeupdate", updateProgress);
-audio.addEventListener("loadedmetadata", updateProgress);
-
-function setVolumeUI(v) {
-  let pct = Math.round(v * 100);
-  let trackH = volTrack.offsetHeight;
-  let fillH = trackH * v;
-  volFill.style.height = fillH + "px";
-  volThumb.style.bottom = (fillH - 2.5) + "px";
-  volPct.textContent = pct + "%";
-}
-
-setVolumeUI(volume);
-
-playBtn.addEventListener("click", () => {
-  if (playing) {
-    iconPlay.style.display = "block";
-    iconPause.style.display = "none";
-    playing = false;
-    fadeOut(() => {
-      audio.pause();
-    });
-  } else {
+    let volume = 0.20;
     audio.volume = 0;
-    audio.play().then(() => {
-      iconPlay.style.display = "none";
-      iconPause.style.display = "block";
-      playing = true;
-      fadeIn(volume);
-    }).catch(() => {});
-  }
-});
+    function formatTime(s) { if(isNaN(s)) return "0:00"; let m=Math.floor(s/60), sec=Math.floor(s%60); return `${m}:${sec.toString().padStart(2,'0')}`; }
+    function updateSeekAndTime() { if(!audio.duration) return; seekBar.value = audio.currentTime; currentTimeSpan.textContent = formatTime(audio.currentTime); }
+    audio.addEventListener("timeupdate", updateSeekAndTime);
+    audio.addEventListener("loadedmetadata", () => { updateTotalTime(); updateSeekAndTime(); });
+    seekBar.addEventListener("input", () => { audio.currentTime = seekBar.value; updateSeekAndTime(); });
 
-document.getElementById("next-btn").addEventListener("click", nextTrack);
-document.getElementById("prev-btn").addEventListener("click", prevTrack);
+    playBtnCtrl.addEventListener("click", () => {
+      if (playing) {
+        iconPlayCtrl.style.display="block"; iconPauseCtrl.style.display="none"; playing=false;
+        fadeOut(()=>audio.pause());
+      } else {
+        audio.volume=0; audio.play().then(()=>{
+          iconPlayCtrl.style.display="none"; iconPauseCtrl.style.display="block"; playing=true; fadeIn(volume);
+        }).catch(()=>{});
+      }
+    });
+    prevBtnCtrl.addEventListener("click", prevTrack);
+    nextBtnCtrl.addEventListener("click", nextTrack);
+    audio.addEventListener("ended", nextTrack);
 
-audio.addEventListener("ended", () => {
-  nextTrack();
-});
+    volumeSlider.addEventListener("input", () => {
+      volume = volumeSlider.value/100;
+      volumePct.textContent = Math.round(volume*100)+"%";
+      if(!fadeInterval && playing) audio.volume = sliderToReal(volume);
+      if(volume===0) volumeIcon.textContent="";
+      else if(volume<0.3) volumeIcon.textContent="";
+      else if(volume<0.7) volumeIcon.textContent="";
+      else volumeIcon.textContent="";
+    });
 
-function volFromEvent(e) {
-  let rect = volTrack.getBoundingClientRect();
-  let cY = e.touches ? e.touches[0].clientY : e.clientY;
-  let newVol = Math.max(0, Math.min(1, 1 - (cY - rect.top) / rect.height));
-  volume = newVol;
-  setVolumeUI(volume);
-  if (!fadeInterval && playing) {
-    audio.volume = sliderToReal(volume);
-  }
-}
-volTrack.addEventListener("mousedown", e => { dragging = true; volFromEvent(e); });
-volTrack.addEventListener("touchstart", e => { dragging = true; volFromEvent(e); }, { passive: true });
-document.addEventListener("mousemove", e => { if (dragging) volFromEvent(e); });
-document.addEventListener("touchmove", e => { if (dragging) volFromEvent(e); }, { passive: true });
-document.addEventListener("mouseup", () => dragging = false);
-document.addEventListener("touchend", () => dragging = false);
+    const faces = ["FUCK OFF","GO AWAY","LEAVE","DIE","KYS","SUFFER"];
+    let fi=0;
+    setInterval(()=>{ fi=(fi+1)%faces.length; document.title=faces[fi]; document.getElementById("title").textContent=faces[fi]; },2000);
 
-/* ══ КАСТОМНЫЙ КУРСОР ══ */
-let mx = 0, my = 0, cx = 0, cy = 0;
-document.addEventListener("mousemove", e => { mx = e.clientX; my = e.clientY; });
-(function cursorAnim() {
-  cx += (mx - cx) * 0.7;
-  cy += (my - cy) * 0.7;
-  cursor.style.left = (cx - 10) + "px";
-  cursor.style.top = (cy - 10) + "px";
-  requestAnimationFrame(cursorAnim);
-})();
+    // Раскрытие дополнительной информации внутри оверлея
+    const toggleBtn = document.getElementById("toggle-info-btn");
+    const extraInfo = document.getElementById("extra-info");
+    toggleBtn.addEventListener("click", () => {
+      extraInfo.classList.toggle("open");
+      toggleBtn.classList.toggle("active");
+    });
 
-/* ══ ТАЙТЛ ══ */
-const faces = ["FUCK OFF", "GO AWAY", "LEAVE", "DIE", "KYS", "SUFFER"];
-let fi = 0;
-setInterval(() => {
-  fi = (fi + 1) % faces.length;
-  document.title = faces[fi];
-  document.getElementById("title").textContent = faces[fi];
-}, 2000);
-
-/* ══ РЕСАЙЗ ══ */
-window.onresize = () => {
-  canvas.width = innerWidth;
-  canvas.height = innerHeight;
-  spawnParticles();
-  if (textInterval) clearInterval(textInterval);
-  updateText(textList[tIdx]);
-  textInterval = setInterval(() => { tIdx = (tIdx + 1) % textList.length; updateText(textList[tIdx]); }, 5000);
-  setVolumeUI(volume);
-};
+    window.addEventListener("resize", () => {
+      canvas.width = innerWidth; canvas.height = innerHeight;
+      spawnParticles();
+      clearInterval(textInterval);
+      updateText(textList[tIdx]);
+      textInterval = setInterval(() => { tIdx=(tIdx+1)%textList.length; updateText(textList[tIdx]); }, 5000);
+    });
+  })();
 </script>
 </body>
 </html>
